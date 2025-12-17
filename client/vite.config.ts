@@ -21,15 +21,20 @@ export default defineConfig(({ mode }) => ({
         manualChunks: (id) => {
           // Vendor chunks - separate large libraries
           if (id.includes('node_modules')) {
-            // React and React DOM
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            // React and React DOM - MUST be loaded first, keep together
+            if (
+              id.includes('react') ||
+              id.includes('react-dom') ||
+              id.includes('react-router') ||
+              id.includes('scheduler')
+            ) {
               return 'react-vendor';
             }
             // Recharts (charting library - can be large)
             if (id.includes('recharts')) {
               return 'recharts';
             }
-            // Radix UI components
+            // Radix UI components - keep together
             if (id.includes('@radix-ui')) {
               return 'radix-ui';
             }
@@ -41,12 +46,12 @@ export default defineConfig(({ mode }) => ({
             if (id.includes('lucide-react')) {
               return 'icons';
             }
-            // Everything else from node_modules
+            // Put everything else in vendor - Vite will handle loading order
             return 'vendor';
           }
         },
       },
     },
-    chunkSizeWarningLimit: 600, // Increase limit slightly since we're splitting
+    chunkSizeWarningLimit: 600,
   },
 }));
