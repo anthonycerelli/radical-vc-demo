@@ -180,17 +180,29 @@ const AnalyticsCharts = ({
     : 0;
   const yAxisWidth = Math.max(80, Math.min(120, 60 + maxCategoryLength * 5));
 
+  // Calculate dynamic chart height based on number of categories
+  // Formula: baseHeight + perCategory * categories.length
+  // With min/max bounds for readability
+  const categoryCount = categoryChartData.length;
+  const baseHeight = 150; // Base height in pixels
+  const perCategory = 20; // Pixels per category
+  const minHeight = 200; // Minimum height
+  const maxHeight = 380; // Maximum height cap
+  
+  const calculatedHeight = baseHeight + perCategory * categoryCount;
+  const chartHeight = Math.max(minHeight, Math.min(maxHeight, calculatedHeight));
+
   return (
     <div className="grid grid-cols-2 gap-4 mb-5">
       {/* Companies by Category */}
       <div className="radical-card p-4">
         <h3 className="section-label mb-4">Companies by Category</h3>
-        <div className="h-48">
+        <div style={{ height: `${chartHeight}px` }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={categoryChartData}
               layout="vertical"
-              margin={{ top: 5, right: 20, bottom: 5, left: Math.max(100, yAxisWidth + 10) }}
+              margin={{ top: 8, right: 20, bottom: 8, left: Math.max(100, yAxisWidth + 10) }}
             >
               <XAxis
                 type="number"
