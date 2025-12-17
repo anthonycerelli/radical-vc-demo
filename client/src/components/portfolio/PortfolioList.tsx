@@ -28,7 +28,7 @@ const PortfolioList = ({ companies, selectedCompany, onSelectCompany }: Portfoli
                     {company.name}
                   </h3>
                   <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
-                    {company.description}
+                    {company.description || company.tagline || 'No description available'}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {company.categories.map((cat) => (
@@ -40,7 +40,7 @@ const PortfolioList = ({ companies, selectedCompany, onSelectCompany }: Portfoli
                 </div>
                 <div className="text-right shrink-0">
                   <span className="text-[11px] text-muted-foreground uppercase tracking-[0.08em] font-medium">
-                    {company.year}
+                    {company.year ? (typeof company.year === 'number' ? company.year.toString() : company.year) : 'N/A'}
                   </span>
                 </div>
               </div>

@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User } from 'lucide-react';
+import { Send, Bot, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Company } from '@/types/company';
+import { sendChatMessage } from '@/lib/api';
 
 interface Message {
   id: string;
@@ -24,6 +25,7 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
     },
   ]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -42,14 +44,18 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
       const contextMessage: Message = {
         id: Date.now().toString(),
         role: 'assistant',
-        content: `I see you've selected **${company.name}**. This is a ${company.stage} company in the ${company.categories.join(', ')} space. They're based in ${company.location} with a team of ${company.teamSize} people. What would you like to know about them?`,
+        content: `I see you've selected **${company.name}**. ${
+          company.primaryCategory
+            ? `This is a company in the ${company.primaryCategory} space.`
+            : 'This is one of our portfolio companies.'
+        } ${company.description ? `They focus on: ${company.description.substring(0, 100)}...` : ''} What would you like to know about them?`,
       };
       setMessages((prev) => [...prev, contextMessage]);
     }
   }, [company]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -58,17 +64,33 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const currentInput = input;
     setInput('');
+    setIsLoading(true);
 
-    // Simulate assistant response
-    setTimeout(() => {
+    try {
+      const response = await sendChatMessage({
+        message: currentInput,
+        selectedCompanySlug: company?.slug || null,
+        topK: 5,
+      });
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: getSimulatedResponse(input, company),
+        content: response.answer,
       };
       setMessages((prev) => [...prev, assistantMessage]);
-    }, 800);
+    } catch (error) {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Failed to get response'}. Please try again.`,
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -129,45 +151,19 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
           />
           <Button
             onClick={handleSend}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isLoading}
             className="bg-accent hover:bg-[hsl(335,79%,49%)] text-white px-4 shrink-0 transition-colors duration-150 rounded-md"
           >
-            <Send className="w-4 h-4" />
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Send className="w-4 h-4" />
+            )}
           </Button>
         </div>
       </div>
     </div>
   );
 };
-
-function getSimulatedResponse(input: string, company: Company | null): string {
-  const lowerInput = input.toLowerCase();
-
-  if (company) {
-    if (lowerInput.includes('competitor') || lowerInput.includes('competition')) {
-      return `${company.name} operates in a competitive landscape within the ${company.categories.join(' and ')} sectors. Key factors that differentiate them include their technology approach, team expertise, and go-to-market strategy. Would you like me to dive deeper into any specific aspect?`;
-    }
-    if (
-      lowerInput.includes('metric') ||
-      lowerInput.includes('performance') ||
-      lowerInput.includes('growth')
-    ) {
-      return `Based on the latest data, ${company.name} has shown strong growth trajectory. As a ${company.stage} company, they're focused on scaling their operations. I can provide more specific metrics if you'd like to explore particular KPIs.`;
-    }
-    if (lowerInput.includes('team') || lowerInput.includes('founder')) {
-      return `${company.name} has a team of ${company.teamSize} people based in ${company.location}. The founding team brings expertise in ${company.categories.join(' and ')}. Would you like more details about the leadership team?`;
-    }
-  }
-
-  if (lowerInput.includes('portfolio') || lowerInput.includes('companies')) {
-    return "The Radical portfolio spans multiple sectors including AI/ML, Climate, Healthcare, and Enterprise software. We've invested in companies at various stages from seed to growth. Would you like me to filter by any specific criteria?";
-  }
-
-  if (lowerInput.includes('trend') || lowerInput.includes('insight')) {
-    return 'Key trends across the portfolio include the rise of foundation models in enterprise applications, climate tech gaining significant traction, and increased focus on AI infrastructure. What area interests you most?';
-  }
-
-  return 'I can help you explore portfolio companies, analyze trends, compare investments, or dive deep into specific company details. What would you like to focus on?';
-}
 
 export default CopilotChat;

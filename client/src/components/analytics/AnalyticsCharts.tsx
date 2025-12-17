@@ -1,4 +1,6 @@
+import { useQuery } from '@tanstack/react-query';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { fetchInsights } from '@/lib/api';
 
 const categoryData = [
   { name: 'LLMs', value: 14 },
@@ -27,6 +29,36 @@ const COLORS = {
 };
 
 const AnalyticsCharts = () => {
+  const { data: insights, isLoading } = useQuery({
+    queryKey: ['insights'],
+    queryFn: fetchInsights,
+    refetchOnWindowFocus: false,
+  });
+
+  // Transform API data for charts
+  const categoryChartData = insights?.byCategory.map((item) => ({
+    name: item.category,
+    value: item.count,
+  })) || categoryData;
+
+  const yearChartData = insights?.byYear.map((item) => ({
+    year: item.year.toString(),
+    count: item.count,
+  })) || yearData;
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 gap-4 mb-5">
+        <div className="radical-card p-4">
+          <div className="h-48 animate-pulse bg-muted rounded" />
+        </div>
+        <div className="radical-card p-4">
+          <div className="h-48 animate-pulse bg-muted rounded" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-2 gap-4 mb-5">
       {/* Companies by Category */}
@@ -34,7 +66,7 @@ const AnalyticsCharts = () => {
         <h3 className="section-label mb-4">Companies by Category</h3>
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={categoryData} layout="vertical">
+            <BarChart data={categoryChartData} layout="vertical">
               <XAxis
                 type="number"
                 axisLine={{ stroke: COLORS.border }}
@@ -74,7 +106,7 @@ const AnalyticsCharts = () => {
         <h3 className="section-label mb-4">Investments by Year</h3>
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={yearData}>
+            <BarChart data={yearChartData}>
               <XAxis
                 dataKey="year"
                 axisLine={{ stroke: COLORS.border }}
