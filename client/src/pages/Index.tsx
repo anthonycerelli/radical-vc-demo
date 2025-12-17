@@ -37,11 +37,29 @@ const Index = () => {
     );
   };
 
+  const handleClearFilters = () => {
+    setSelectedCategories([]);
+    setSelectedYear('All Years');
+    setSearchQuery('');
+  };
+
   // Transform API companies to frontend format
   const companies = useMemo(() => {
     if (!companiesData?.companies) return [];
     return companiesData.companies.map(transformApiCompany);
   }, [companiesData]);
+
+  // Get available categories from companies
+  const availableCategories = useMemo(() => {
+    const categorySet = new Set<string>();
+    companies.forEach((company) => {
+      if (company.primaryCategory) {
+        categorySet.add(company.primaryCategory);
+      }
+      company.categories?.forEach((cat) => categorySet.add(cat));
+    });
+    return Array.from(categorySet).sort();
+  }, [companies]);
 
   // Client-side filtering (as backup, though API handles most of it)
   const filteredCompanies = useMemo(() => {
@@ -100,6 +118,10 @@ const Index = () => {
           onYearChange={setSelectedYear}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          onClearFilters={handleClearFilters}
+          filteredCount={filteredCompanies.length}
+          totalCount={companies.length}
+          availableCategories={availableCategories}
         />
 
         {/* Center: Portfolio List with Analytics */}
@@ -115,7 +137,13 @@ const Index = () => {
 
             {/* Analytics Charts */}
             <Suspense fallback={<div className="h-64 animate-pulse bg-muted rounded" />}>
-              <AnalyticsCharts />
+              <AnalyticsCharts
+                filteredCompanies={filteredCompanies}
+                selectedCategories={selectedCategories}
+                selectedYear={selectedYear}
+                onCategoryClick={handleCategoryToggle}
+                onYearClick={setSelectedYear}
+              />
             </Suspense>
           </div>
 

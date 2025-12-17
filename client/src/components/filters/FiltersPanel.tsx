@@ -1,5 +1,6 @@
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -7,16 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-const categories = [
-  'Climate',
-  'LLMs',
-  'Robotics',
-  'Healthcare',
-  'Enterprise',
-  'Biotech',
-  'Infrastructure',
-];
 
 const years = ['2024', '2023', '2022', '2021', '2020', '2019', 'All Years'];
 
@@ -27,6 +18,10 @@ interface FiltersPanelProps {
   onYearChange: (year: string) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  onClearFilters: () => void;
+  filteredCount: number;
+  totalCount: number;
+  availableCategories: string[];
 }
 
 const FiltersPanel = ({
@@ -36,7 +31,12 @@ const FiltersPanel = ({
   onYearChange,
   searchQuery,
   onSearchChange,
+  onClearFilters,
+  filteredCount,
+  totalCount,
+  availableCategories,
 }: FiltersPanelProps) => {
+  const hasActiveFilters = selectedCategories.length > 0 || selectedYear !== 'All Years' || searchQuery.length > 0;
   return (
     <aside className="w-64 bg-background border-r border-border p-5 flex flex-col gap-6">
       <div>
@@ -59,18 +59,22 @@ const FiltersPanel = ({
       <div>
         <h3 className="section-label mb-3">Category</h3>
         <div className="flex flex-wrap gap-2">
-          {categories.map((category) => {
-            const isActive = selectedCategories.includes(category);
-            return (
-              <button
-                key={category}
-                onClick={() => onCategoryToggle(category)}
-                className={isActive ? 'filter-chip-active' : 'filter-chip-default'}
-              >
-                {category}
-              </button>
-            );
-          })}
+          {availableCategories.length > 0 ? (
+            availableCategories.map((category) => {
+              const isActive = selectedCategories.includes(category);
+              return (
+                <button
+                  key={category}
+                  onClick={() => onCategoryToggle(category)}
+                  className={isActive ? 'filter-chip-active' : 'filter-chip-default'}
+                >
+                  {category}
+                </button>
+              );
+            })
+          ) : (
+            <p className="text-xs text-muted-foreground">No categories available</p>
+          )}
         </div>
       </div>
 
@@ -91,11 +95,25 @@ const FiltersPanel = ({
         </Select>
       </div>
 
+      {/* Clear Filters */}
+      {hasActiveFilters && (
+        <div>
+          <Button
+            onClick={onClearFilters}
+            variant="outline"
+            className="w-full border-border text-navy hover:bg-subtle hover:text-navy transition-colors duration-150"
+          >
+            <X className="w-4 h-4 mr-2" />
+            Clear Filters
+          </Button>
+        </div>
+      )}
+
       {/* Quick Stats */}
       <div className="mt-auto pt-4 border-t border-border">
         <p className="text-xs text-muted-foreground">
-          Showing <span className="font-semibold text-navy">12</span> of{' '}
-          <span className="font-semibold text-navy">48</span> companies
+          Showing <span className="font-semibold text-navy">{filteredCount}</span> of{' '}
+          <span className="font-semibold text-navy">{totalCount}</span> companies
         </p>
       </div>
     </aside>

@@ -1,23 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { fetchInsights } from '@/lib/api';
-
-const categoryData = [
-  { name: 'LLMs', value: 14 },
-  { name: 'Climate', value: 10 },
-  { name: 'Healthcare', value: 8 },
-  { name: 'Enterprise', value: 7 },
-  { name: 'Robotics', value: 5 },
-  { name: 'Biotech', value: 4 },
-];
-
-const yearData = [
-  { year: '2020', count: 5 },
-  { year: '2021', count: 8 },
-  { year: '2022', count: 12 },
-  { year: '2023', count: 15 },
-  { year: '2024', count: 8 },
-];
+import { useMemo } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Company } from '@/types/company';
 
 const COLORS = {
   navy: '#003E7E',
@@ -26,38 +9,109 @@ const COLORS = {
   gray: '#9AA3B5',
   border: '#E1E4EB',
   mutedText: '#7A8497',
+  selected: '#001F4D', // Darker navy for selected
 };
 
-const AnalyticsCharts = () => {
-  const { data: insights, isLoading } = useQuery({
-    queryKey: ['insights'],
-    queryFn: fetchInsights,
-    refetchOnWindowFocus: false,
-  });
+interface AnalyticsChartsProps {
+  filteredCompanies: Company[];
+  selectedCategories: string[];
+  selectedYear: string;
+  onCategoryClick: (category: string) => void;
+  onYearClick: (year: string) => void;
+}
 
-  // Transform API data for charts
-  const categoryChartData = insights?.byCategory.map((item) => ({
-    name: item.category,
-    value: item.count,
-  })) || categoryData;
-
-  const yearChartData = insights?.byYear.map((item) => ({
-    year: item.year.toString(),
-    count: item.count,
-  })) || yearData;
-
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-2 gap-4 mb-5">
-        <div className="radical-card p-4">
-          <div className="h-48 animate-pulse bg-muted rounded" />
-        </div>
-        <div className="radical-card p-4">
-          <div className="h-48 animate-pulse bg-muted rounded" />
-        </div>
-      </div>
-    );
+/**
+ * Calculate dynamic tick values for x-axis
+ * Returns whole numbers that evenly divide the range
+ */
+/**
+ * Calculate dynamic tick values for x-axis
+ * Returns whole numbers that evenly divide the range
+ */
+function calculateTicks(maxValue: number): number[] {
+  if (maxValue === 0) return [0];
+  
+  // Find a nice step size
+  const magnitude = Math.pow(10, Math.floor(Math.log10(maxValue)));
+  const normalized = maxValue / magnitude;
+  
+  let step: number;
+  if (normalized <= 1) step = 0.5 * magnitude;
+  else if (normalized <= 2) step = magnitude;
+  else if (normalized <= 5) step = 2.5 * magnitude;
+  else step = 5 * magnitude;
+  
+  // Round step to whole number
+  step = Math.ceil(step);
+  
+  const ticks: number[] = [0];
+  let current = step;
+  while (current <= maxValue) {
+    ticks.push(current);
+    current += step;
   }
+  
+  // Ensure max value is included if not already
+  if (ticks[ticks.length - 1] < maxValue) {
+    ticks.push(Math.ceil(maxValue));
+  }
+  
+  return ticks;
+}
+
+const AnalyticsCharts = ({
+  filteredCompanies,
+  selectedCategories,
+  selectedYear,
+  onCategoryClick,
+  onYearClick,
+}: AnalyticsChartsProps) => {
+  // Compute category data from filtered companies
+  const categoryChartData = useMemo(() => {
+    const categoryMap = new Map<string, number>();
+    
+    filteredCompanies.forEach((company) => {
+      // Use primary category if available, otherwise use first category
+      const category = company.primaryCategory || 
+        (company.categories && company.categories.length > 0 ? company.categories[0] : 'Uncategorized');
+      
+      if (category) {
+        categoryMap.set(category, (categoryMap.get(category) || 0) + 1);
+      }
+    });
+    
+    return Array.from(categoryMap.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [filteredCompanies]);
+
+  // Compute year data from filtered companies
+  const yearChartData = useMemo(() => {
+    const yearMap = new Map<string, number>();
+    
+    filteredCompanies.forEach((company) => {
+      if (company.year) {
+        const yearStr = typeof company.year === 'number' ? company.year.toString() : company.year;
+        yearMap.set(yearStr, (yearMap.get(yearStr) || 0) + 1);
+      }
+    });
+    
+    return Array.from(yearMap.entries())
+      .map(([year, count]) => ({ year, count }))
+      .sort((a, b) => a.year.localeCompare(b.year));
+  }, [filteredCompanies]);
+
+  // Calculate dynamic ticks for category chart
+  const maxCategoryValue = categoryChartData.length > 0 
+    ? Math.max(...categoryChartData.map((d) => d.value))
+    : 0;
+  const categoryTicks = calculateTicks(maxCategoryValue);
+
+  // Calculate dynamic ticks for year chart
+  const maxYearValue = yearChartData.length > 0
+    ? Math.max(...yearChartData.map((d) => d.count))
+    : 0;
+  const yearTicks = calculateTicks(maxYearValue);
 
   return (
     <div className="grid grid-cols-2 gap-4 mb-5">
@@ -66,12 +120,18 @@ const AnalyticsCharts = () => {
         <h3 className="section-label mb-4">Companies by Category</h3>
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={categoryChartData} layout="vertical">
+            <BarChart
+              data={categoryChartData}
+              layout="vertical"
+              margin={{ top: 5, right: 20, bottom: 5, left: 5 }}
+            >
               <XAxis
                 type="number"
                 axisLine={{ stroke: COLORS.border }}
                 tickLine={false}
                 tick={{ fill: COLORS.mutedText, fontSize: 11 }}
+                ticks={categoryTicks}
+                domain={[0, 'dataMax']}
               />
               <YAxis
                 type="category"
@@ -92,10 +152,26 @@ const AnalyticsCharts = () => {
               />
               <Bar
                 dataKey="value"
-                fill={COLORS.navy}
                 radius={[0, 4, 4, 0]}
-                activeBar={{ fill: COLORS.magenta }}
-              />
+                onClick={(entry: { name?: string }) => {
+                  if (entry?.name) {
+                    onCategoryClick(entry.name);
+                  }
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                {categoryChartData.map((entry, index) => {
+                  const isSelected = selectedCategories.includes(entry.name);
+                  return (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={isSelected ? COLORS.selected : COLORS.navy}
+                      stroke={isSelected ? COLORS.magenta : 'none'}
+                      strokeWidth={isSelected ? 2 : 0}
+                    />
+                  );
+                })}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -106,7 +182,10 @@ const AnalyticsCharts = () => {
         <h3 className="section-label mb-4">Investments by Year</h3>
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={yearChartData}>
+            <BarChart
+              data={yearChartData}
+              margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+            >
               <XAxis
                 dataKey="year"
                 axisLine={{ stroke: COLORS.border }}
@@ -117,6 +196,8 @@ const AnalyticsCharts = () => {
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: COLORS.mutedText, fontSize: 11 }}
+                ticks={yearTicks}
+                domain={[0, 'dataMax']}
               />
               <Tooltip
                 contentStyle={{
@@ -129,10 +210,27 @@ const AnalyticsCharts = () => {
               />
               <Bar
                 dataKey="count"
-                fill={COLORS.navy}
                 radius={[4, 4, 0, 0]}
-                activeBar={{ fill: COLORS.magenta }}
-              />
+                onClick={(data: unknown) => {
+                  const entry = data as { year?: string };
+                  if (entry?.year) {
+                    onYearClick(entry.year);
+                  }
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                {yearChartData.map((entry, index) => {
+                  const isSelected = selectedYear === entry.year;
+                  return (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={isSelected ? COLORS.selected : COLORS.navy}
+                      stroke={isSelected ? COLORS.magenta : 'none'}
+                      strokeWidth={isSelected ? 2 : 0}
+                    />
+                  );
+                })}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
