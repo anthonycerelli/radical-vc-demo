@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import type { YAxisProps } from 'recharts';
 import { Company } from '@/types/company';
 
 const COLORS = {
@@ -23,37 +22,9 @@ interface AnalyticsChartsProps {
 }
 
 /**
- * Format category label for y-axis display
- * - Truncates if > 14 characters
- * - Attempts to wrap two-word categories on space
- * - Returns { display: string, full: string } for tooltip
+ * Calculate dynamic tick values for x-axis
+ * Returns whole numbers that evenly divide the range
  */
-function formatCategoryLabel(category: string, maxLength: number = 14): { display: string; full: string } {
-  const full = category.trim();
-  
-  if (!full) {
-    return { display: '', full: '' };
-  }
-  
-  if (full.length <= maxLength) {
-    return { display: full, full };
-  }
-  
-  // Try to break on space for two-word categories
-  const words = full.split(/\s+/);
-  if (words.length === 2) {
-    // If both words fit on separate lines, return with line break
-    const firstWord = words[0];
-    const secondWord = words[1];
-    if (firstWord.length <= maxLength && secondWord.length <= maxLength) {
-      return { display: `${firstWord}\n${secondWord}`, full };
-    }
-  }
-  
-  // Otherwise truncate with ellipsis
-  return { display: `${full.substring(0, maxLength - 1)}…`, full };
-}
-
 /**
  * Calculate dynamic tick values for x-axis
  * Returns whole numbers that evenly divide the range
@@ -99,8 +70,6 @@ const AnalyticsCharts = ({
 }: AnalyticsChartsProps) => {
   // Compute category data based on filter state
   const categoryChartData = useMemo(() => {
-    let data: Array<{ name: string; value: number }>;
-    
     // If no categories are selected, show all categories from all companies
     if (selectedCategories.length === 0) {
       const categoryMap = new Map<string, number>();
@@ -114,35 +83,25 @@ const AnalyticsCharts = ({
         });
       });
       
-      data = Array.from(categoryMap.entries())
-        .map(([name, value]) => ({ name, value }))
-        .sort((a, b) => b.value - a.value);
-    } else {
-      // If categories are selected, only show those selected categories
-      // Count how many filtered companies have each selected category
-      const categoryMap = new Map<string, number>();
-      
-      selectedCategories.forEach((category) => {
-        const count = filteredCompanies.filter((company) =>
-          company.categories?.includes(category)
-        ).length;
-        categoryMap.set(category, count);
-      });
-      
-      data = Array.from(categoryMap.entries())
+      return Array.from(categoryMap.entries())
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value);
     }
     
-    // If there are many categories (> 10), show top 8 and group the rest
-    // For now, we show all categories as requested, but this structure allows
-    // easy implementation of "top N + Other" grouping in the future
-    if (data.length > 10) {
-      // Future: could implement top 8 + "Other" grouping here
-      // For now, just return all (as requested)
-    }
+    // If categories are selected, only show those selected categories
+    // Count how many filtered companies have each selected category
+    const categoryMap = new Map<string, number>();
     
-    return data;
+    selectedCategories.forEach((category) => {
+      const count = filteredCompanies.filter((company) =>
+        company.categories?.includes(category)
+      ).length;
+      categoryMap.set(category, count);
+    });
+    
+    return Array.from(categoryMap.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
   }, [filteredCompanies, allCompanies, selectedCategories]);
 
   // Compute year data from filtered companies
@@ -173,36 +132,17 @@ const AnalyticsCharts = ({
     : 0;
   const yearTicks = calculateTicks(maxYearValue);
 
-  // Calculate YAxis width based on longest category name
-  // Base width + extra space for longer names
-  const maxCategoryLength = categoryChartData.length > 0
-    ? Math.max(...categoryChartData.map((d) => d.name.length))
-    : 0;
-  const yAxisWidth = Math.max(80, Math.min(120, 60 + maxCategoryLength * 5));
-
-  // Calculate dynamic chart height based on number of categories
-  // Formula: baseHeight + perCategory * categories.length
-  // With min/max bounds for readability
-  const categoryCount = categoryChartData.length;
-  const baseHeight = 150; // Base height in pixels
-  const perCategory = 20; // Pixels per category
-  const minHeight = 200; // Minimum height
-  const maxHeight = 380; // Maximum height cap
-  
-  const calculatedHeight = baseHeight + perCategory * categoryCount;
-  const chartHeight = Math.max(minHeight, Math.min(maxHeight, calculatedHeight));
-
   return (
     <div className="grid grid-cols-2 gap-4 mb-5">
       {/* Companies by Category */}
       <div className="radical-card p-4">
         <h3 className="section-label mb-4">Companies by Category</h3>
-        <div style={{ height: `${chartHeight}px` }}>
+        <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={categoryChartData}
               layout="vertical"
-              margin={{ top: 8, right: 20, bottom: 8, left: Math.max(100, yAxisWidth + 10) }}
+              margin={{ top: 5, right: 20, bottom: 5, left: 5 }}
             >
               <XAxis
                 type="number"
@@ -217,43 +157,8 @@ const AnalyticsCharts = ({
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                width={yAxisWidth}
-                tickMargin={8}
-                tick={(props: any) => {
-                  const { x, y, payload } = props;
-                  const { display, full } = formatCategoryLabel(payload.value);
-                  const lines = display.split('\n');
-                  const isTruncated = full !== display;
-                  
-                  return (
-                    <g transform={`translate(${x},${y})`}>
-                      {isTruncated && (
-                        <title>{full}</title>
-                      )}
-                      <text
-                        x={0}
-                        y={0}
-                        dy={lines.length > 1 ? -4 : 0}
-                        textAnchor="end"
-                        fill={COLORS.navy}
-                        fontSize={11}
-                        fontWeight={500}
-                        style={{ cursor: isTruncated ? 'help' : 'default' }}
-                      >
-                        {lines.map((line: string, index: number) => (
-                          <tspan
-                            key={index}
-                            x={0}
-                            dy={index === 0 ? 0 : 12}
-                            textAnchor="end"
-                          >
-                            {line}
-                          </tspan>
-                        ))}
-                      </text>
-                    </g>
-                  );
-                }}
+                tick={{ fill: COLORS.navy, fontSize: 11, fontWeight: 500 }}
+                width={80}
               />
               <Tooltip
                 contentStyle={{
