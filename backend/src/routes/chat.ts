@@ -143,17 +143,7 @@ router.post('/', async (req: Request, res: Response) => {
       });
     }
 
-    // Get all portfolio company names for hallucination check
-    const { data: allCompanies } = await supabase
-      .from('companies')
-      .select('name, slug');
-    
-    const portfolioNames = new Set(
-      (allCompanies || []).map((c) => c.name.toLowerCase())
-    );
-    const portfolioSlugs = new Set(
-      (allCompanies || []).map((c) => c.slug.toLowerCase())
-    );
+    // Note: Portfolio names/slugs could be used for additional hallucination checks if needed
 
     // Build portfolio context as structured JSON
     const portfolioCompanies = topCompanies.map(({ company }) => ({
