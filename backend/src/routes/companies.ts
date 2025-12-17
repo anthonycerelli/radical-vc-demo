@@ -97,10 +97,10 @@ router.get('/:slug', async (req: Request, res: Response) => {
       throw error;
     }
 
-    res.json(data as Company);
+    return res.json(data as Company);
   } catch (error) {
     console.error('Error fetching company:', error);
-    res.status(500).json({
+    return res.status(500).json({
       error: {
         message: 'Failed to fetch company',
       },

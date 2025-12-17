@@ -1,12 +1,14 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, lazy, Suspense } from "react";
 import Navbar from "@/components/layout/Navbar";
 import FiltersPanel from "@/components/filters/FiltersPanel";
 import PortfolioList from "@/components/portfolio/PortfolioList";
 import CompanySnapshot from "@/components/portfolio/CompanySnapshot";
 import CopilotChat from "@/components/copilot/CopilotChat";
-import AnalyticsCharts from "@/components/analytics/AnalyticsCharts";
 import { mockCompanies } from "@/data/mockCompanies";
 import { Company } from "@/types/company";
+
+// Lazy load AnalyticsCharts since it includes recharts (large dependency)
+const AnalyticsCharts = lazy(() => import("@/components/analytics/AnalyticsCharts"));
 
 const Index = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -78,7 +80,9 @@ const Index = () => {
             </div>
 
             {/* Analytics Charts */}
-            <AnalyticsCharts />
+            <Suspense fallback={<div className="h-64 animate-pulse bg-muted rounded" />}>
+              <AnalyticsCharts />
+            </Suspense>
           </div>
 
           {/* Portfolio List */}

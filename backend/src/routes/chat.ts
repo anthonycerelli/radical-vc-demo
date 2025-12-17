@@ -183,13 +183,13 @@ router.post('/', async (req: Request, res: Response) => {
       });
     }
 
-    res.json({
+    return res.json({
       answer,
       sources,
     });
   } catch (error) {
     console.error('Error in chat endpoint:', error);
-    res.status(500).json({
+    return res.status(500).json({
       error: {
         message: 'Failed to process chat message',
       },

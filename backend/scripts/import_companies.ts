@@ -95,10 +95,6 @@ async function upsertEmbedding(
   if (error) {
     throw new Error(`Failed to insert embedding for company ${companyId}: ${error.message}`);
   }
-
-  if (error) {
-    throw new Error(`Failed to insert embedding for company ${companyId}: ${error.message}`);
-  }
 }
 
 /**

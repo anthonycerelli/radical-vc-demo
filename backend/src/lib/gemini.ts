@@ -73,7 +73,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
         throw new Error(`Gemini embedding API error: ${error}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as { embedding?: { values?: number[] } };
       embedding = data.embedding?.values;
     }
     
@@ -103,6 +103,7 @@ export async function generateChatCompletion(
 ): Promise<string> {
   const model = genAI.getGenerativeModel({ 
     model: CHAT_MODEL,
+    // @ts-expect-error - systemInstruction may not be in types but is supported
     systemInstruction: systemPrompt,
   });
 

@@ -7,7 +7,7 @@ const router = Router();
  * GET /api/insights/summary
  * Get portfolio analytics (by category and year)
  */
-router.get('/summary', async (req: Request, res: Response) => {
+router.get('/summary', async (_req: Request, res: Response) => {
   try {
     // Get all companies
     const { data: companies, error } = await supabase
