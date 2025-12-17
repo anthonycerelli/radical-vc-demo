@@ -33,8 +33,9 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 
     // Try SDK method first (if the method exists on the client)
     try {
-      // @ts-ignore - embedContent might not be in types but could exist at runtime
+      // @ts-expect-error - embedContent might not be in types but could exist at runtime
       if (typeof genAI.embedContent === 'function') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = await (genAI as any).embedContent({
           model: EMBEDDING_MODEL,
           contents: [text],
@@ -45,7 +46,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
           embedding = result.embeddings[0].values;
         }
       }
-    } catch (sdkError) {
+    } catch {
       // Fall through to REST API
     }
 
@@ -85,8 +86,9 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     }
 
     return embedding;
-  } catch (error: any) {
-    throw new Error(`Failed to generate embedding: ${error.message}`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Failed to generate embedding: ${message}`);
   }
 }
 
@@ -117,8 +119,9 @@ export async function generateChatCompletion(
 
     const response = await result.response;
     return response.text();
-  } catch (error: any) {
-    throw new Error(`Failed to generate chat completion: ${error.message}`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Failed to generate chat completion: ${message}`);
   }
 }
 

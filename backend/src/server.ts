@@ -37,7 +37,7 @@ app.use('/api/insights', insightsRouter);
 app.use('/api/chat', chatRouter);
 
 // Error handling middleware
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Unhandled error:', err);
   res.status(500).json({
     error: {

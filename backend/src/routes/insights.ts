@@ -56,7 +56,7 @@ router.get('/summary', async (req: Request, res: Response) => {
       byCategory,
       byYear,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching insights:', error);
     res.status(500).json({
       error: {

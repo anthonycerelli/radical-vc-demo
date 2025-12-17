@@ -61,7 +61,7 @@ router.get('/', async (req: Request, res: Response) => {
       companies: (data as Company[]) || [],
       total: count || 0,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching companies:', error);
     res.status(500).json({
       error: {
@@ -98,7 +98,7 @@ router.get('/:slug', async (req: Request, res: Response) => {
     }
 
     res.json(data as Company);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching company:', error);
     res.status(500).json({
       error: {

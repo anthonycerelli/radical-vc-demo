@@ -65,9 +65,18 @@ npm run format:write       # Auto-fix formatting
 
 ### Testing
 ```bash
-npm run test              # Run tests
-npm run test:watch         # Run tests in watch mode
-npm run test:coverage      # Run tests with coverage (70% threshold)
+# Run all tests (client + backend + e2e)
+npm run test
+
+# Run tests by layer
+npm run test:client        # Client unit/component tests
+npm run test:backend       # Backend unit/integration tests
+npm run test:e2e          # End-to-end API tests
+
+# Coverage
+npm run test:coverage      # All layers with coverage
+npm run test:coverage:client
+npm run test:coverage:backend
 ```
 
 ### Build
@@ -107,8 +116,21 @@ The CI pipeline runs:
 - **TypeScript**: Strict mode enabled with `noUnusedLocals`, `noUnusedParameters`, `noImplicitReturns`
 - **Linting**: ESLint with 0 warnings policy
 - **Formatting**: Prettier with consistent style
-- **Testing**: Vitest with 70% coverage threshold
+- **Testing**: 
+  - Client: Vitest + React Testing Library (70% coverage threshold)
+  - Backend: Vitest + Supertest for API tests (70% coverage threshold)
+  - E2E: Vitest for cross-stack integration tests
 - **Security**: Regular npm audit checks
+
+## Test Structure
+
+Tests are organized by layer:
+
+- **Client tests**: `client/src/**/*.test.{ts,tsx}` - Component and hook tests
+- **Backend tests**: `backend/src/**/*.test.ts` - Route, service, and data layer tests
+- **E2E tests**: `tests/e2e/**/*.test.ts` - Full-stack integration tests
+
+Each layer has its own Vitest config and runs independently.
 
 ## Additional Tools
 

@@ -1,10 +1,17 @@
 import { defineConfig } from 'vitest/config';
 
+/**
+ * Root Vitest config for E2E / cross-cutting tests only
+ * 
+ * Client tests: Run from client/ directory
+ * Backend tests: Run from backend/ directory
+ * E2E tests: Run from root with this config
+ */
 export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
+    include: ['tests/e2e/**/*.test.ts'],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
@@ -12,6 +19,8 @@ export default defineConfig({
       '**/.next/**',
       '**/.nuxt/**',
       '**/coverage/**',
+      'client/**',
+      'backend/**',
     ],
     coverage: {
       provider: 'v8',
@@ -25,7 +34,9 @@ export default defineConfig({
         '**/*.d.ts',
         '**/migrations/**',
         '**/scripts/**',
-        '**/__tests__/**',
+        'tests/**',
+        'client/**',
+        'backend/**',
       ],
       thresholds: {
         lines: 70,

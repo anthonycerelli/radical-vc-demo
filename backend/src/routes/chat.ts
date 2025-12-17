@@ -132,10 +132,13 @@ router.post('/', async (req: Request, res: Response) => {
       }
     } else if (similarCompanies) {
       // Use RPC results if available
-      topCompanies = similarCompanies.map((item: any) => ({
-        company: item as Company,
-        distance: item.distance || 0,
-      }));
+      topCompanies = similarCompanies.map((item: unknown) => {
+        const companyItem = item as { company?: Company; distance?: number };
+        return {
+          company: companyItem.company as Company,
+          distance: companyItem.distance || 0,
+        };
+      });
     }
 
     // Build context for LLM
@@ -184,7 +187,7 @@ router.post('/', async (req: Request, res: Response) => {
       answer,
       sources,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in chat endpoint:', error);
     res.status(500).json({
       error: {
