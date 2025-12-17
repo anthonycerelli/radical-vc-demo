@@ -16,42 +16,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks: (id) => {
-          // Vendor chunks - separate large libraries
-          if (id.includes('node_modules')) {
-            // React and React DOM - MUST be loaded first, keep together
-            if (
-              id.includes('react') ||
-              id.includes('react-dom') ||
-              id.includes('react-router') ||
-              id.includes('scheduler')
-            ) {
-              return 'react-vendor';
-            }
-            // Recharts (charting library - can be large)
-            if (id.includes('recharts')) {
-              return 'recharts';
-            }
-            // Radix UI components - keep together
-            if (id.includes('@radix-ui')) {
-              return 'radix-ui';
-            }
-            // TanStack Query
-            if (id.includes('@tanstack/react-query')) {
-              return 'react-query';
-            }
-            // Other large dependencies
-            if (id.includes('lucide-react')) {
-              return 'icons';
-            }
-            // Put everything else in vendor - Vite will handle loading order
-            return 'vendor';
-          }
-        },
-      },
-    },
-    chunkSizeWarningLimit: 600,
+    // Let Vite handle chunking automatically to avoid React loading order issues
+    chunkSizeWarningLimit: 1000,
   },
 }));
