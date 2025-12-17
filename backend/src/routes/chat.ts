@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { supabase } from '../lib/supabaseClient.js';
-import { generateEmbedding, generateChatCompletion } from '../lib/openai.js';
+import { generateEmbedding, generateChatCompletion } from '../lib/gemini.js';
 import { Company } from '../types/database.js';
 
 const router = Router();

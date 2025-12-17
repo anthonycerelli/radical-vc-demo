@@ -7,14 +7,14 @@ Backend API for the Radical Portfolio Copilot internal tool. Provides REST endpo
 - **Language**: TypeScript (Node.js)
 - **Database**: Supabase PostgreSQL with pgvector extension
 - **Vector Store**: pgvector for semantic search
-- **LLM/Embeddings**: OpenAI (GPT-4 and text-embedding-3-large)
+- **LLM/Embeddings**: Google Gemini (gemini-pro and text-embedding-004)
 - **Framework**: Express.js
 
 ## Prerequisites
 
 - Node.js 18+ and npm
 - Supabase account and project
-- OpenAI API key
+- Google Gemini API key
 - TypeScript 5.3+
 
 ## Setup
@@ -36,7 +36,7 @@ cp .env.example .env
 Required environment variables:
 - `SUPABASE_URL`: Your Supabase project URL
 - `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key (for admin operations)
-- `OPENAI_API_KEY`: Your OpenAI API key
+- `GEMINI_API_KEY`: Your Google Gemini API key
 - `PORT`: Server port (default: 3001)
 
 ### 3. Run Database Migrations
@@ -63,6 +63,26 @@ Execute the migration files in order against your Supabase database:
    -- Run migrations/004_create_search_function.sql
    ```
 
+5. **Enable RLS policies**:
+   ```sql
+   -- Run migrations/006_enable_rls_policies.sql
+   ```
+
+6. **Fix security warnings**:
+   ```sql
+   -- Run migrations/007_fix_security_warnings.sql
+   ```
+
+7. **Move vector extension** (if needed):
+   ```sql
+   -- Run migrations/008_move_vector_extension.sql
+   ```
+
+8. **Update for Gemini embeddings** (768 dimensions):
+   ```sql
+   -- Run migrations/009_update_for_gemini_embeddings.sql
+   ```
+
 You can run these migrations via:
 - Supabase Dashboard SQL Editor
 - Supabase CLI: `supabase db push`
@@ -79,7 +99,7 @@ npm run import
 This script will:
 - Read the JSON file
 - Upsert companies into the database
-- Generate embeddings for each company using OpenAI
+- Generate embeddings for each company using Google Gemini (768 dimensions)
 - Store embeddings in the `company_embeddings` table
 
 The import is idempotent - you can run it multiple times safely.
@@ -224,7 +244,7 @@ The chat endpoint:
 2. Performs semantic search over company embeddings
 3. Retrieves top-k similar companies
 4. Builds context including selected company (if provided) and similar companies
-5. Calls OpenAI GPT-4 to generate an answer
+5. Calls Google Gemini (gemini-pro) to generate an answer
 6. Returns the answer with cited sources
 
 ## Example Requests
@@ -266,7 +286,7 @@ backend/
 ├── src/
 │   ├── lib/
 │   │   ├── supabaseClient.ts    # Supabase client initialization
-│   │   └── openai.ts             # OpenAI client and helpers
+│   │   └── gemini.ts             # Google Gemini client and helpers
 │   ├── routes/
 │   │   ├── companies.ts          # Company endpoints
 │   │   ├── insights.ts           # Analytics endpoints
@@ -325,8 +345,8 @@ HTTP status codes:
 ## Notes
 
 - The vector search uses cosine distance for similarity matching
-- Embeddings are generated using OpenAI's `text-embedding-3-large` model (1536 dimensions)
-- The chat endpoint uses GPT-4 for generating responses
+- Embeddings are generated using Google Gemini's `text-embedding-004` model (768 dimensions)
+- The chat endpoint uses Gemini Pro for generating responses
 - The import script is idempotent and safe to run multiple times
 - Category filtering supports both primary category and array overlap matching
 
@@ -338,7 +358,7 @@ If you see errors about the RPC function, make sure you've run `migrations/004_c
 
 ### Embedding generation fails
 
-Check that your `OPENAI_API_KEY` is valid and has sufficient credits. The import script will skip companies that fail embedding generation.
+Check that your `GEMINI_API_KEY` is valid and has sufficient quota. The import script will skip companies that fail embedding generation.
 
 ### Database connection errors
 

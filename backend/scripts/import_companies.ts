@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { supabase } from '../src/lib/supabaseClient.js';
-import { generateEmbedding } from '../src/lib/openai.js';
+import { generateEmbedding } from '../src/lib/gemini.js';
 import { CompanyInput, PortfolioData } from '../src/types/database.js';
 
 const DATA_FILE = join(process.cwd(), 'data', 'radical_portfolio_companies.json');
