@@ -92,7 +92,7 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
             <div
               className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
                 message.role === "assistant"
-                  ? "bg-secondary text-navy"
+                  ? "bg-subtle text-navy"
                   : "bg-navy text-white"
               }`}
             >
@@ -124,13 +124,13 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask about portfolio companies..."
-            className="min-h-[44px] max-h-32 resize-none bg-background border-border focus:border-magenta focus:ring-magenta"
+            className="min-h-[44px] max-h-32 resize-none bg-background border-border focus:border-accent focus:ring-accent transition-colors duration-150"
             rows={1}
           />
           <Button
             onClick={handleSend}
             disabled={!input.trim()}
-            className="bg-magenta hover:bg-magenta-hover text-white px-4 shrink-0"
+            className="bg-accent hover:bg-[hsl(335,79%,49%)] text-white px-4 shrink-0 transition-colors duration-150 rounded-md"
           >
             <Send className="w-4 h-4" />
           </Button>

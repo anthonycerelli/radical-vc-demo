@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const categoryData = [
   { name: "LLMs", value: 14 },
@@ -22,6 +22,8 @@ const COLORS = {
   magenta: "#FF2C8B",
   teal: "#00A9C4",
   gray: "#9AA3B5",
+  border: "#E1E4EB",
+  mutedText: "#7A8497",
 };
 
 const AnalyticsCharts = () => {
@@ -33,23 +35,28 @@ const AnalyticsCharts = () => {
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={categoryData} layout="vertical">
-              <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#7A8497", fontSize: 12 }} />
+              <XAxis 
+                type="number" 
+                axisLine={{ stroke: COLORS.border }} 
+                tickLine={false} 
+                tick={{ fill: COLORS.mutedText, fontSize: 11 }} 
+              />
               <YAxis 
                 type="category" 
                 dataKey="name" 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fill: "#003E7E", fontSize: 12 }}
+                tick={{ fill: COLORS.navy, fontSize: 11, fontWeight: 500 }}
                 width={80}
               />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "#FFFFFF",
-                  border: "1px solid #E1E4EB",
+                  border: `1px solid ${COLORS.border}`,
                   borderRadius: "6px",
                   fontSize: "12px",
                 }}
-                labelStyle={{ color: "#003E7E", fontWeight: 600 }}
+                labelStyle={{ color: COLORS.navy, fontWeight: 600 }}
               />
               <Bar 
                 dataKey="value" 
@@ -70,23 +77,23 @@ const AnalyticsCharts = () => {
             <BarChart data={yearData}>
               <XAxis 
                 dataKey="year" 
-                axisLine={false} 
+                axisLine={{ stroke: COLORS.border }} 
                 tickLine={false} 
-                tick={{ fill: "#7A8497", fontSize: 12 }}
+                tick={{ fill: COLORS.mutedText, fontSize: 11 }}
               />
               <YAxis 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fill: "#7A8497", fontSize: 12 }}
+                tick={{ fill: COLORS.mutedText, fontSize: 11 }}
               />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "#FFFFFF",
-                  border: "1px solid #E1E4EB",
+                  border: `1px solid ${COLORS.border}`,
                   borderRadius: "6px",
                   fontSize: "12px",
                 }}
-                labelStyle={{ color: "#003E7E", fontWeight: 600 }}
+                labelStyle={{ color: COLORS.navy, fontWeight: 600 }}
               />
               <Bar 
                 dataKey="count" 

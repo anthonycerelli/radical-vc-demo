@@ -10,7 +10,7 @@ const CompanySnapshot = ({ company }: CompanySnapshotProps) => {
     return (
       <div className="radical-card p-5">
         <h3 className="section-label mb-4">Company Snapshot</h3>
-        <div className="text-muted-foreground text-sm text-center py-8">
+        <div className="text-[#9AA3B5] text-sm text-center py-8">
           Select a company to view details
         </div>
       </div>
@@ -30,18 +30,18 @@ const CompanySnapshot = ({ company }: CompanySnapshotProps) => {
 
         {/* Key Info Grid */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-secondary rounded-md p-3">
+          <div className="bg-subtle rounded-md p-3">
             <div className="flex items-center gap-2 mb-1">
               <TrendingUp className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">Stage</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-[0.08em] font-medium">Stage</span>
             </div>
             <p className="text-navy font-medium text-sm">{company.stage}</p>
           </div>
           
-          <div className="bg-secondary rounded-md p-3">
+          <div className="bg-subtle rounded-md p-3">
             <div className="flex items-center gap-2 mb-1">
               <Users className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">Team</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-[0.08em] font-medium">Team</span>
             </div>
             <p className="text-navy font-medium text-sm">{company.teamSize} people</p>
           </div>
@@ -75,7 +75,7 @@ const CompanySnapshot = ({ company }: CompanySnapshotProps) => {
             href={company.website}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm text-navy hover:text-navy-hover transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-navy hover:text-navy-hover transition-colors duration-150"
           >
             <Globe className="w-4 h-4" />
             <span>Visit Website</span>

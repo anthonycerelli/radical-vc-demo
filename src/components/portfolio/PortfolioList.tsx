@@ -25,7 +25,7 @@ const PortfolioList = ({
               key={company.id}
               onClick={() => onSelectCompany(company)}
               className={`company-card ${
-                isSelected ? "border-navy bg-secondary/50" : ""
+                isSelected ? "border-accent" : ""
               }`}
             >
               <div className="flex items-start justify-between gap-4">
@@ -45,7 +45,7 @@ const PortfolioList = ({
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                  <span className="text-[11px] text-muted-foreground uppercase tracking-[0.08em] font-medium">
                     {company.year}
                   </span>
                 </div>

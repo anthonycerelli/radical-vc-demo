@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -51,7 +50,7 @@ const FiltersPanel = ({
             placeholder="Search companies..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-9 bg-background border-border focus:border-magenta focus:ring-magenta"
+            className="pl-9 bg-background border-border focus:border-accent focus:ring-accent transition-colors duration-150"
           />
         </div>
       </div>
@@ -79,7 +78,7 @@ const FiltersPanel = ({
       <div>
         <h3 className="section-label mb-3">Investment Year</h3>
         <Select value={selectedYear} onValueChange={onYearChange}>
-          <SelectTrigger className="w-full bg-background border-border text-navy">
+          <SelectTrigger className="w-full bg-background border-border text-navy focus:border-accent focus:ring-accent transition-colors duration-150">
             <SelectValue placeholder="Select year" />
           </SelectTrigger>
           <SelectContent className="bg-background border-border">
