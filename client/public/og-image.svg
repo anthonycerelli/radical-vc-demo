@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#003E7E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#001F3F;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+  
+  <!-- Accent shapes -->
+  <circle cx="1000" cy="150" r="80" fill="#FF2C8B" opacity="0.3"/>
+  <circle cx="200" cy="500" r="60" fill="#00A9C4" opacity="0.3"/>
+  
+  <!-- Main content -->
+  <g transform="translate(100, 200)">
+    <!-- R Logo -->
+    <rect x="0" y="0" width="120" height="120" rx="24" fill="#FF2C8B"/>
+    <text x="60" y="85" font-family="Inter, sans-serif" font-size="80" font-weight="700" fill="white" text-anchor="middle" letter-spacing="-3">R</text>
+    
+    <!-- Text -->
+    <text x="160" y="50" font-family="Inter, sans-serif" font-size="64" font-weight="700" fill="white" letter-spacing="-1">Radical Portfolio</text>
+    <text x="160" y="110" font-family="Inter, sans-serif" font-size="64" font-weight="700" fill="white" letter-spacing="-1">Copilot</text>
+    
+    <!-- Subtitle -->
+    <text x="0" y="170" font-family="Inter, sans-serif" font-size="28" font-weight="400" fill="#9AA3B5" letter-spacing="0.5">AI-Native Portfolio Insights</text>
+  </g>
+</svg>
+
