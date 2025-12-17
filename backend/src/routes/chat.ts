@@ -46,40 +46,81 @@ router.post('/', async (req: Request, res: Response) => {
       }
     }
 
-    // Generate embedding for the user message
-    const queryEmbedding = await generateEmbedding(message);
+    // Check if embeddings exist in database
+    const { count: embeddingCount } = await supabase
+      .from('company_embeddings')
+      .select('*', { count: 'exact', head: true })
+      .eq('source', 'description');
 
-    // Perform vector similarity search
-    // Note: Supabase PostgREST doesn't directly support vector operations,
-    // so we need to use a stored function or raw SQL
-    // Format embedding as string array for PostgreSQL vector type
-    const embeddingString = `[${queryEmbedding.join(',')}]`;
+    console.log('Embeddings in database:', embeddingCount);
 
-    const { data: similarCompanies, error: searchError } = await supabase.rpc(
-      'search_similar_companies',
-      {
-        query_embedding: embeddingString,
-        match_threshold: 0.7,
-        match_count: topK,
-      }
-    );
-
-    // Fallback: If RPC doesn't exist, use a simpler approach with raw SQL via Supabase
-    // For now, we'll use a workaround by fetching all embeddings and doing client-side search
-    // In production, you should create the RPC function in the database
     let topCompanies: Array<{ company: Company; distance: number }> = [];
 
-    if (searchError) {
-      console.warn('RPC function not found, using fallback method:', searchError);
-      // Fallback: fetch embeddings and compute similarity client-side
-      const { data: embeddings, error: embError } = await supabase
-        .from('company_embeddings')
-        .select('company_id, embedding')
-        .eq('source', 'description');
+    // If no embeddings, use keyword search immediately
+    if (!embeddingCount || embeddingCount === 0) {
+      console.warn('No embeddings found in database. Using keyword search fallback.');
+      const searchTerms = message.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+      if (searchTerms.length > 0) {
+        const { data: keywordResults } = await supabase
+          .from('companies')
+          .select('*')
+          .or(`name.ilike.%${searchTerms[0]}%,description.ilike.%${searchTerms[0]}%,radical_primary_category.ilike.%${searchTerms[0]}%`)
+          .limit(topK * 2);
 
-      if (!embError && embeddings) {
-        // Calculate cosine similarity for each embedding
-        const similarities = embeddings
+        if (keywordResults && keywordResults.length > 0) {
+          topCompanies = keywordResults.slice(0, topK).map((company) => ({
+            company: company as Company,
+            distance: 0.9,
+          }));
+          console.log('Keyword search found', topCompanies.length, 'companies');
+        }
+      }
+    } else {
+      // Generate embedding for the user message
+      const queryEmbedding = await generateEmbedding(message);
+      console.log('Generated query embedding, length:', queryEmbedding.length);
+
+      // Perform vector similarity search
+      // Note: Supabase PostgREST doesn't directly support vector operations,
+      // so we need to use a stored function or raw SQL
+      // Format embedding as string array for PostgreSQL vector type
+      const embeddingString = `[${queryEmbedding.join(',')}]`;
+
+      const { data: similarCompanies, error: searchError } = await supabase.rpc(
+        'search_similar_companies',
+        {
+          query_embedding: embeddingString,
+          match_threshold: 0.5, // Lower threshold to get more results
+          match_count: topK,
+        }
+      );
+
+      console.log('RPC search result:', {
+        hasData: !!similarCompanies,
+        dataLength: similarCompanies?.length || 0,
+        error: searchError?.message,
+      });
+
+      // Fallback: If RPC doesn't exist, use a simpler approach with raw SQL via Supabase
+      // For now, we'll use a workaround by fetching all embeddings and doing client-side search
+      // In production, you should create the RPC function in the database
+
+      if (searchError) {
+        console.warn('RPC function not found, using fallback method:', searchError);
+        // Fallback: fetch embeddings and compute similarity client-side
+        const { data: embeddings, error: embError } = await supabase
+          .from('company_embeddings')
+          .select('company_id, embedding')
+          .eq('source', 'description');
+
+        console.log('Fallback: fetched embeddings:', {
+          count: embeddings?.length || 0,
+          error: embError?.message,
+        });
+
+        if (!embError && embeddings && embeddings.length > 0) {
+          // Calculate cosine similarity for each embedding
+          const similarities = embeddings
           .map((emb) => {
             // Handle different embedding formats from Supabase
             let embVector: number[];
@@ -107,40 +148,92 @@ router.post('/', async (req: Request, res: Response) => {
             }
 
             const distance = cosineDistance(queryEmbedding, embVector);
-            return { company_id: emb.company_id, distance };
+            // Use similarity (1 - distance) for threshold, distance < 0.5 means similarity > 0.5
+            if (distance < 0.5) {
+              return { company_id: emb.company_id, distance };
+            }
+            return null;
           })
           .filter((s): s is { company_id: string; distance: number } => s !== null)
           .sort((a, b) => a.distance - b.distance)
           .slice(0, topK);
 
-        // Fetch company details for top matches
-        const companyIds = similarities.map((s) => s.company_id);
-        const { data: companies } = await supabase
+          console.log('Fallback: computed similarities:', {
+            count: similarities.length,
+            topDistances: similarities.slice(0, 3).map((s) => s.distance),
+          });
+
+          // Fetch company details for top matches
+          const companyIds = similarities.map((s) => s.company_id);
+          const { data: companies } = await supabase
+            .from('companies')
+            .select('*')
+            .in('id', companyIds);
+
+          if (companies) {
+            topCompanies = similarities.map((sim) => {
+              const company = companies.find((c) => c.id === sim.company_id);
+              return {
+                company: company as Company,
+                distance: sim.distance,
+              };
+            });
+          }
+        }
+      } else if (similarCompanies && Array.isArray(similarCompanies) && similarCompanies.length > 0) {
+        // Use RPC results if available
+        // The RPC function returns companies directly with a distance field
+        topCompanies = similarCompanies.map((item: Company & { distance?: number }) => {
+          // Extract distance and remove it from the company object
+          const { distance, ...company } = item;
+          return {
+            company: company as Company,
+            distance: distance || 0,
+          };
+        });
+        console.log('Using RPC results, found', topCompanies.length, 'companies');
+      }
+
+      // If no companies found, try a fallback: use keyword search or fetch all companies
+      if (topCompanies.length === 0) {
+      console.warn('No companies found from vector search, trying keyword fallback');
+      
+      // Try keyword-based search as fallback
+      const searchTerms = message.toLowerCase().split(/\s+/).filter((w) => w.length > 3);
+      const keywordQuery = searchTerms.join(' | ');
+      
+      if (keywordQuery) {
+        const { data: keywordResults, error: keywordError } = await supabase
           .from('companies')
           .select('*')
-          .in('id', companyIds);
+          .or(`name.ilike.%${searchTerms[0]}%,description.ilike.%${searchTerms[0]}%,radical_primary_category.ilike.%${searchTerms[0]}%`)
+          .limit(topK);
 
-        if (companies) {
-          topCompanies = similarities.map((sim) => {
-            const company = companies.find((c) => c.id === sim.company_id);
-            return {
-              company: company as Company,
-              distance: sim.distance,
-            };
-          });
+        if (!keywordError && keywordResults && keywordResults.length > 0) {
+          topCompanies = keywordResults.map((company) => ({
+            company: company as Company,
+            distance: 0.8, // Medium distance for keyword match
+          }));
+          console.log('Keyword fallback: found', topCompanies.length, 'companies');
         }
       }
-    } else if (similarCompanies && Array.isArray(similarCompanies) && similarCompanies.length > 0) {
-      // Use RPC results if available
-      // The RPC function returns companies directly with a distance field
-      topCompanies = similarCompanies.map((item: Company & { distance?: number }) => {
-        // Extract distance and remove it from the company object
-        const { distance, ...company } = item;
-        return {
-          company: company as Company,
-          distance: distance || 0,
-        };
-      });
+
+      // If still no results, fetch all companies and let LLM filter
+      if (topCompanies.length === 0) {
+        console.warn('No keyword matches, falling back to all companies');
+        const { data: allCompaniesData, error: allError } = await supabase
+          .from('companies')
+          .select('*')
+          .limit(30); // Limit to avoid too much context
+
+        if (!allError && allCompaniesData && allCompaniesData.length > 0) {
+          topCompanies = allCompaniesData.map((company) => ({
+            company: company as Company,
+            distance: 1.0, // High distance since not matched
+          }));
+          console.log('Final fallback: using', topCompanies.length, 'companies from database');
+        }
+      }
     }
 
     // Note: Portfolio names/slugs could be used for additional hallucination checks if needed
@@ -157,6 +250,11 @@ router.post('/', async (req: Request, res: Response) => {
       all_sectors: company.all_sectors,
       primary_sector: company.primary_sector,
     }));
+
+    console.log('Portfolio context prepared:', {
+      companyCount: portfolioCompanies.length,
+      companyNames: portfolioCompanies.map((c) => c.name).slice(0, 5),
+    });
 
     // Include selected company if provided
     if (selectedCompany && !portfolioCompanies.find((c) => c.slug === selectedCompany!.slug)) {
