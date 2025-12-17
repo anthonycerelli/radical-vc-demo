@@ -295,13 +295,15 @@ Using ONLY the portfolio_context JSON above, answer the following question:
 
 Question: "${message}"
 
-Respond with:
-- A short sentence summarizing how many companies in the portfolio fit (if applicable).
-- A bullet list of relevant companies, each with:
-  - name
-  - slug
-  - primary category
-  - 1–2 sentences on why they are relevant.
+Respond with clean, readable text (NO markdown formatting like * or **). Use plain text formatting:
+- Start with a short sentence summarizing how many companies in the portfolio fit (if applicable).
+- Then list each relevant company on a new line with:
+  • Company name (in bold by using clear emphasis, but write it as plain text)
+  • slug: [slug]
+  • primary category: [category]
+  • 1–2 sentences explaining why they are relevant
+
+Format your response as clean, readable text without markdown syntax. Use line breaks and simple formatting that reads naturally.
 
 Do NOT mention companies not present in portfolio_context.`;
 

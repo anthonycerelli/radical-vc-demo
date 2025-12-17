@@ -5,6 +5,71 @@ import { Textarea } from '@/components/ui/textarea';
 import { Company } from '@/types/company';
 import { sendChatMessage } from '@/lib/api';
 
+/**
+ * Format chat message content for better display
+ * Converts markdown-like formatting to cleaner HTML
+ */
+function formatChatMessage(content: string): React.ReactNode {
+  // Split by lines and process
+  const lines = content.split('\n');
+  const elements: React.ReactNode[] = [];
+  
+  lines.forEach((line, index) => {
+    const trimmed = line.trim();
+    
+    // Skip empty lines but add spacing
+    if (!trimmed) {
+      if (index > 0 && index < lines.length - 1) {
+        elements.push(<div key={`spacer-${index}`} className="h-2" />);
+      }
+      return;
+    }
+    
+    // Handle bullet points (convert * to •)
+    if (trimmed.startsWith('*')) {
+      const text = trimmed.replace(/^\*\s*/, '').trim();
+      // Check if it's a nested bullet (starts with spaces or tabs)
+      const isNested = line.match(/^\s+/);
+      const indent = isNested ? 'ml-6' : 'ml-0';
+      
+      // Check for bold text (**text**)
+      const parts = text.split(/(\*\*[^*]+\*\*)/g);
+      const formattedText = parts.map((part, partIndex) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          const boldText = part.slice(2, -2);
+          return <strong key={`bold-${index}-${partIndex}`} className="font-semibold text-navy">{boldText}</strong>;
+        }
+        return part;
+      });
+      
+      elements.push(
+        <div key={`line-${index}`} className={`flex items-start gap-2 ${indent} my-1.5`}>
+          <span className="text-navy mt-0.5 shrink-0">•</span>
+          <span className="flex-1 leading-relaxed">{formattedText}</span>
+        </div>
+      );
+    } else {
+      // Regular paragraph
+      const parts = trimmed.split(/(\*\*[^*]+\*\*)/g);
+      const formattedText = parts.map((part, partIndex) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          const boldText = part.slice(2, -2);
+          return <strong key={`bold-${index}-${partIndex}`} className="font-semibold text-navy">{boldText}</strong>;
+        }
+        return part;
+      });
+      
+      elements.push(
+        <p key={`line-${index}`} className="my-1.5 leading-relaxed">
+          {formattedText}
+        </p>
+      );
+    }
+  });
+  
+  return <div className="space-y-0.5">{elements}</div>;
+}
+
 interface Message {
   id: string;
   role: 'assistant' | 'user';
@@ -131,7 +196,9 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
                 message.role === 'assistant' ? 'chat-bubble-assistant' : 'chat-bubble-user'
               }`}
             >
-              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              <div className="text-sm whitespace-pre-wrap prose prose-sm max-w-none">
+                {formatChatMessage(message.content)}
+              </div>
             </div>
           </div>
         ))}
