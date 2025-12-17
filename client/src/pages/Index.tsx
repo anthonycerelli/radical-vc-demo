@@ -139,6 +139,7 @@ const Index = () => {
             <Suspense fallback={<div className="h-64 animate-pulse bg-muted rounded" />}>
               <AnalyticsCharts
                 filteredCompanies={filteredCompanies}
+                allCompanies={companies}
                 selectedCategories={selectedCategories}
                 selectedYear={selectedYear}
                 onCategoryClick={handleCategoryToggle}

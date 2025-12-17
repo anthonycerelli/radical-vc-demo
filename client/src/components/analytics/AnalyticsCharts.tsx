@@ -14,6 +14,7 @@ const COLORS = {
 
 interface AnalyticsChartsProps {
   filteredCompanies: Company[];
+  allCompanies: Company[]; // Unfiltered companies for "show all categories" mode
   selectedCategories: string[];
   selectedYear: string;
   onCategoryClick: (category: string) => void;
@@ -61,29 +62,47 @@ function calculateTicks(maxValue: number): number[] {
 
 const AnalyticsCharts = ({
   filteredCompanies,
+  allCompanies,
   selectedCategories,
   selectedYear,
   onCategoryClick,
   onYearClick,
 }: AnalyticsChartsProps) => {
-  // Compute category data from filtered companies
+  // Compute category data based on filter state
   const categoryChartData = useMemo(() => {
+    // If no categories are selected, show all categories from all companies
+    if (selectedCategories.length === 0) {
+      const categoryMap = new Map<string, number>();
+      
+      allCompanies.forEach((company) => {
+        // Count all categories for each company
+        company.categories?.forEach((category) => {
+          if (category) {
+            categoryMap.set(category, (categoryMap.get(category) || 0) + 1);
+          }
+        });
+      });
+      
+      return Array.from(categoryMap.entries())
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value);
+    }
+    
+    // If categories are selected, only show those selected categories
+    // Count how many filtered companies have each selected category
     const categoryMap = new Map<string, number>();
     
-    filteredCompanies.forEach((company) => {
-      // Use primary category if available, otherwise use first category
-      const category = company.primaryCategory || 
-        (company.categories && company.categories.length > 0 ? company.categories[0] : 'Uncategorized');
-      
-      if (category) {
-        categoryMap.set(category, (categoryMap.get(category) || 0) + 1);
-      }
+    selectedCategories.forEach((category) => {
+      const count = filteredCompanies.filter((company) =>
+        company.categories?.includes(category)
+      ).length;
+      categoryMap.set(category, count);
     });
     
     return Array.from(categoryMap.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
-  }, [filteredCompanies]);
+  }, [filteredCompanies, allCompanies, selectedCategories]);
 
   // Compute year data from filtered companies
   const yearChartData = useMemo(() => {
