@@ -24,4 +24,3 @@ export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseServic
 export const getDbClient = () => {
   return supabase;
 };
-

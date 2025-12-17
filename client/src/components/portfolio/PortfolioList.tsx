@@ -1,4 +1,4 @@
-import { Company } from "@/types/company";
+import { Company } from '@/types/company';
 
 interface PortfolioListProps {
   companies: Company[];
@@ -6,17 +6,13 @@ interface PortfolioListProps {
   onSelectCompany: (company: Company) => void;
 }
 
-const PortfolioList = ({
-  companies,
-  selectedCompany,
-  onSelectCompany,
-}: PortfolioListProps) => {
+const PortfolioList = ({ companies, selectedCompany, onSelectCompany }: PortfolioListProps) => {
   return (
     <div className="flex-1 p-5 overflow-auto">
       <div className="mb-4">
         <h2 className="section-label">Portfolio Companies</h2>
       </div>
-      
+
       <div className="grid gap-3">
         {companies.map((company) => {
           const isSelected = selectedCompany?.id === company.id;
@@ -24,9 +20,7 @@ const PortfolioList = ({
             <div
               key={company.id}
               onClick={() => onSelectCompany(company)}
-              className={`company-card ${
-                isSelected ? "border-accent" : ""
-              }`}
+              className={`company-card ${isSelected ? 'border-accent' : ''}`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">

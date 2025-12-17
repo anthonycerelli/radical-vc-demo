@@ -40,7 +40,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
           model: EMBEDDING_MODEL,
           contents: [text],
         });
-        
+
         // Response structure: { embeddings: [{ values: [...] }] }
         if (result.embeddings && result.embeddings[0]?.values) {
           embedding = result.embeddings[0].values;
@@ -76,13 +76,15 @@ export async function generateEmbedding(text: string): Promise<number[]> {
       const data = (await response.json()) as { embedding?: { values?: number[] } };
       embedding = data.embedding?.values;
     }
-    
+
     if (!embedding || !Array.isArray(embedding)) {
       throw new Error('Invalid embedding response format');
     }
-    
+
     if (embedding.length !== EMBEDDING_DIMENSIONS) {
-      throw new Error(`Expected embedding of length ${EMBEDDING_DIMENSIONS}, got ${embedding.length}`);
+      throw new Error(
+        `Expected embedding of length ${EMBEDDING_DIMENSIONS}, got ${embedding.length}`
+      );
     }
 
     return embedding;
@@ -101,7 +103,7 @@ export async function generateChatCompletion(
   userMessage: string,
   context?: string
 ): Promise<string> {
-  const model = genAI.getGenerativeModel({ 
+  const model = genAI.getGenerativeModel({
     model: CHAT_MODEL,
     // @ts-expect-error - systemInstruction may not be in types but is supported
     systemInstruction: systemPrompt,
@@ -125,4 +127,3 @@ export async function generateChatCompletion(
     throw new Error(`Failed to generate chat completion: ${message}`);
   }
 }
-

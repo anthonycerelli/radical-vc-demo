@@ -44,7 +44,9 @@ describe('CopilotChat', () => {
     const user = userEvent.setup({ delay: null });
     render(<CopilotChat company={null} />);
 
-    const input = screen.getByPlaceholderText('Ask about portfolio companies...') as HTMLTextAreaElement;
+    const input = screen.getByPlaceholderText(
+      'Ask about portfolio companies...'
+    ) as HTMLTextAreaElement;
     const sendButton = screen.getByRole('button');
 
     await user.type(input, 'test message');
@@ -58,7 +60,9 @@ describe('CopilotChat', () => {
     const user = userEvent.setup({ delay: null });
     render(<CopilotChat company={null} />);
 
-    const input = screen.getByPlaceholderText('Ask about portfolio companies...') as HTMLTextAreaElement;
+    const input = screen.getByPlaceholderText(
+      'Ask about portfolio companies...'
+    ) as HTMLTextAreaElement;
     await user.type(input, 'test message{Enter}');
 
     expect(screen.getByText('test message')).toBeInTheDocument();
@@ -71,9 +75,11 @@ describe('CopilotChat', () => {
     const sendButton = screen.getByRole('button');
     expect(sendButton).toBeDisabled();
 
-    const input = screen.getByPlaceholderText('Ask about portfolio companies...') as HTMLTextAreaElement;
+    const input = screen.getByPlaceholderText(
+      'Ask about portfolio companies...'
+    ) as HTMLTextAreaElement;
     await user.type(input, '   ');
-    
+
     // Button should still be disabled for whitespace-only input
     expect(sendButton).toBeDisabled();
   });
@@ -81,7 +87,7 @@ describe('CopilotChat', () => {
   it('should add context message when company is selected', async () => {
     vi.useRealTimers();
     const { rerender } = render(<CopilotChat company={null} />);
-    
+
     rerender(<CopilotChat company={mockCompany} />);
 
     // Wait for context message to appear
@@ -100,7 +106,9 @@ describe('CopilotChat', () => {
     const user = userEvent.setup({ delay: null });
     render(<CopilotChat company={null} />);
 
-    const input = screen.getByPlaceholderText('Ask about portfolio companies...') as HTMLTextAreaElement;
+    const input = screen.getByPlaceholderText(
+      'Ask about portfolio companies...'
+    ) as HTMLTextAreaElement;
     await user.type(input, 'test message');
     await user.keyboard('{Enter}');
 
@@ -128,7 +136,9 @@ describe('CopilotChat', () => {
     const user = userEvent.setup({ delay: null });
     render(<CopilotChat company={null} />);
 
-    const input = screen.getByPlaceholderText('Ask about portfolio companies...') as HTMLTextAreaElement;
+    const input = screen.getByPlaceholderText(
+      'Ask about portfolio companies...'
+    ) as HTMLTextAreaElement;
     await user.type(input, 'tell me about portfolio');
     await user.keyboard('{Enter}');
 
@@ -156,7 +166,9 @@ describe('CopilotChat', () => {
     const user = userEvent.setup({ delay: null });
     render(<CopilotChat company={mockCompany} />);
 
-    const input = screen.getByPlaceholderText('Ask about portfolio companies...') as HTMLTextAreaElement;
+    const input = screen.getByPlaceholderText(
+      'Ask about portfolio companies...'
+    ) as HTMLTextAreaElement;
     await user.type(input, 'who are the competitors');
     await user.keyboard('{Enter}');
 
@@ -182,7 +194,9 @@ describe('CopilotChat', () => {
     const user = userEvent.setup({ delay: null });
     render(<CopilotChat company={mockCompany} />);
 
-    const input = screen.getByPlaceholderText('Ask about portfolio companies...') as HTMLTextAreaElement;
+    const input = screen.getByPlaceholderText(
+      'Ask about portfolio companies...'
+    ) as HTMLTextAreaElement;
     await user.type(input, 'what are the metrics');
     await user.keyboard('{Enter}');
 
@@ -208,7 +222,9 @@ describe('CopilotChat', () => {
     const user = userEvent.setup({ delay: null });
     render(<CopilotChat company={mockCompany} />);
 
-    const input = screen.getByPlaceholderText('Ask about portfolio companies...') as HTMLTextAreaElement;
+    const input = screen.getByPlaceholderText(
+      'Ask about portfolio companies...'
+    ) as HTMLTextAreaElement;
     await user.type(input, 'tell me about the team');
     await user.keyboard('{Enter}');
 
@@ -234,7 +250,9 @@ describe('CopilotChat', () => {
     const user = userEvent.setup({ delay: null });
     render(<CopilotChat company={null} />);
 
-    const input = screen.getByPlaceholderText('Ask about portfolio companies...') as HTMLTextAreaElement;
+    const input = screen.getByPlaceholderText(
+      'Ask about portfolio companies...'
+    ) as HTMLTextAreaElement;
     await user.type(input, 'what are the trends');
     await user.keyboard('{Enter}');
 
@@ -255,4 +273,3 @@ describe('CopilotChat', () => {
     vi.useFakeTimers();
   }, 10000);
 });
-

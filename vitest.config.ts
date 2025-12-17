@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 /**
  * Root Vitest config for E2E / cross-cutting tests only
- * 
+ *
  * Client tests: Run from client/ directory
  * Backend tests: Run from backend/ directory
  * E2E tests: Run from root with this config
@@ -47,4 +47,3 @@ export default defineConfig({
     },
   },
 });
-

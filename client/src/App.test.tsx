@@ -26,4 +26,3 @@ describe('App', () => {
     expect(screen.getByText(/Portfolio Insights/i)).toBeInTheDocument();
   });
 });
-

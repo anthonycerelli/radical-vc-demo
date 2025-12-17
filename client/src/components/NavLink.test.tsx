@@ -56,4 +56,3 @@ describe('NavLink', () => {
     expect(link).toBeInTheDocument();
   });
 });
-

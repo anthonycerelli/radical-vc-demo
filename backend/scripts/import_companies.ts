@@ -85,7 +85,7 @@ async function upsertEmbedding(
   // Supabase PostgREST requires the vector to be passed as a string in array format
   // The database will automatically cast it to the vector type
   const embeddingString = `[${embedding.join(',')}]`;
-  
+
   const { error } = await supabase.from('company_embeddings').insert({
     company_id: companyId,
     embedding: embeddingString,
@@ -122,7 +122,7 @@ async function importCompanies() {
       // Generate embedding
       console.log('  → Generating embedding...');
       const embeddingInput = buildEmbeddingInput(company);
-      
+
       if (!embeddingInput.trim()) {
         console.warn(`  ⚠️  Skipping embedding for ${company.slug} (no content to embed)`);
         successCount++;
@@ -154,4 +154,3 @@ importCompanies().catch((error) => {
   console.error('Fatal error during import:', error);
   process.exit(1);
 });
-

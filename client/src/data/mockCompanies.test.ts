@@ -38,4 +38,3 @@ describe('mockCompanies', () => {
     expect(uniqueIds.size).toBe(ids.length);
   });
 });
-

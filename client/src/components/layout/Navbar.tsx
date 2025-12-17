@@ -1,4 +1,4 @@
-import { Settings, HelpCircle } from "lucide-react";
+import { Settings, HelpCircle } from 'lucide-react';
 
 const Navbar = () => {
   return (
@@ -11,7 +11,7 @@ const Navbar = () => {
           Radical Portfolio Copilot
         </span>
       </div>
-      
+
       <nav className="flex items-center gap-4">
         <button className="flex items-center gap-1.5 text-navy hover:text-navy-hover transition-colors duration-150 text-sm font-medium">
           <HelpCircle className="w-4 h-4" />

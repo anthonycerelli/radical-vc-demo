@@ -20,6 +20,7 @@ npm run install:all
 ```
 
 Or individually:
+
 ```bash
 cd client && npm install
 cd ../backend && npm install
@@ -28,12 +29,14 @@ cd ../backend && npm install
 ### Development
 
 **Frontend:**
+
 ```bash
 cd client
 npm run dev
 ```
 
 **Backend:**
+
 ```bash
 cd backend
 npm run dev
@@ -44,6 +47,7 @@ npm run dev
 All scripts are run from the root directory:
 
 ### Type Safety
+
 ```bash
 npm run typecheck          # Check both client and backend
 npm run typecheck:client   # Check client only
@@ -51,6 +55,7 @@ npm run typecheck:backend  # Check backend only
 ```
 
 ### Linting
+
 ```bash
 npm run lint              # Lint both client and backend
 npm run lint:client        # Lint client only
@@ -58,12 +63,14 @@ npm run lint:backend       # Lint backend only
 ```
 
 ### Formatting
+
 ```bash
 npm run format:check      # Check formatting
 npm run format:write       # Auto-fix formatting
 ```
 
 ### Testing
+
 ```bash
 # Run all tests (client + backend + e2e)
 npm run test
@@ -80,12 +87,14 @@ npm run test:coverage:backend
 ```
 
 ### Build
+
 ```bash
 npm run build:client      # Build frontend
 npm run build:backend      # Build backend
 ```
 
 ### Security
+
 ```bash
 npm run audit             # Audit both client and backend
 npm run audit:client       # Audit client only
@@ -93,6 +102,7 @@ npm run audit:backend     # Audit backend only
 ```
 
 ### Full CI Pipeline
+
 ```bash
 npm run ci                # Runs all checks: typecheck, lint, format, test, build, audit
 ```
@@ -100,10 +110,12 @@ npm run ci                # Runs all checks: typecheck, lint, format, test, buil
 ## CI/CD Pipeline
 
 The project includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that runs on:
+
 - Push to `main` or `develop` branches
 - Pull requests to `main` or `develop` branches
 
 The CI pipeline runs:
+
 1. Type checking
 2. Linting (0 warnings allowed)
 3. Format checking
@@ -116,7 +128,7 @@ The CI pipeline runs:
 - **TypeScript**: Strict mode enabled with `noUnusedLocals`, `noUnusedParameters`, `noImplicitReturns`
 - **Linting**: ESLint with 0 warnings policy
 - **Formatting**: Prettier with consistent style
-- **Testing**: 
+- **Testing**:
   - Client: Vitest + React Testing Library (70% coverage threshold)
   - Backend: Vitest + Supertest for API tests (70% coverage threshold)
   - E2E: Vitest for cross-stack integration tests
@@ -135,15 +147,18 @@ Each layer has its own Vitest config and runs independently.
 ## Additional Tools
 
 ### Check for unused dependencies
+
 ```bash
 npx depcheck
 ```
 
 ### Dead code detection
+
 TypeScript strict mode is enabled to catch unused code at compile time.
 
 ## Environment Setup
 
 See individual READMEs:
+
 - [Client README](./client/README.md) - Frontend setup
 - [Backend README](./backend/README.md) - Backend setup and API documentation

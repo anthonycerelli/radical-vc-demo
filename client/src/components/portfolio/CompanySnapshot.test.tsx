@@ -71,4 +71,3 @@ describe('CompanySnapshot', () => {
     expect(websiteLink).toHaveAttribute('rel', 'noopener noreferrer');
   });
 });
-

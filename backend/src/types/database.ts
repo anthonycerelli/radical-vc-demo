@@ -48,4 +48,3 @@ export interface CompanyInput {
 export interface PortfolioData {
   companies: CompanyInput[];
 }
-

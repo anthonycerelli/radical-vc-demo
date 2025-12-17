@@ -10,13 +10,7 @@ const router = Router();
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const {
-      q,
-      category,
-      year,
-      limit = '20',
-      offset = '0',
-    } = req.query;
+    const { q, category, year, limit = '20', offset = '0' } = req.query;
 
     const limitNum = Math.min(parseInt(limit as string, 10) || 20, 100);
     const offsetNum = parseInt(offset as string, 10) || 0;
@@ -33,7 +27,9 @@ router.get('/', async (req: Request, res: Response) => {
     if (category && typeof category === 'string') {
       const categories = category.split(',').map((c) => c.trim());
       // Filter by primary category OR if any category in the array matches
-      const categoryFilters = categories.map((cat) => `radical_all_categories.cs.{${cat}}`).join(',');
+      const categoryFilters = categories
+        .map((cat) => `radical_all_categories.cs.{${cat}}`)
+        .join(',');
       query = query.or(`radical_primary_category.in.(${categories.join(',')}),${categoryFilters}`);
     }
 
@@ -79,11 +75,7 @@ router.get('/:slug', async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
 
-    const { data, error } = await supabase
-      .from('companies')
-      .select('*')
-      .eq('slug', slug)
-      .single();
+    const { data, error } = await supabase.from('companies').select('*').eq('slug', slug).single();
 
     if (error) {
       if (error.code === 'PGRST116') {
@@ -109,4 +101,3 @@ router.get('/:slug', async (req: Request, res: Response) => {
 });
 
 export default router;
-

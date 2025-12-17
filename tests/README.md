@@ -10,12 +10,14 @@ This repository follows a layered testing approach with clear separation of conc
 
 **Purpose**: Unit tests for React components, hooks, and UI logic
 
-**Stack**: 
+**Stack**:
+
 - Vitest
 - React Testing Library
 - jsdom (for DOM simulation)
 
 **Example locations**:
+
 ```
 client/
   src/
@@ -40,10 +42,12 @@ client/
 **Purpose**: Unit tests for routes, services, and data layer
 
 **Stack**:
+
 - Vitest
 - Supertest (for API route testing)
 
 **Example locations**:
+
 ```
 backend/
   src/
@@ -69,12 +73,14 @@ backend/
 **Stack**: Vitest with fetch API
 
 **Characteristics**:
+
 - Hit real HTTP endpoints (e.g., `http://localhost:3001`)
 - Test full request/response cycles
 - Do NOT import React components or server internals directly
 - Automatically skipped if server is not running
 
 **Example**:
+
 ```
 tests/
   e2e/
@@ -136,7 +142,7 @@ Each layer has its own Vitest configuration:
 ## CI/CD
 
 Tests run automatically in CI:
+
 - Client tests: Unit and component tests
 - Backend tests: Route and service tests
 - E2E tests: Full integration tests (if server is available)
-

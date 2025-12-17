@@ -1,5 +1,5 @@
-import { Company } from "@/types/company";
-import { ExternalLink, Globe, Users, TrendingUp } from "lucide-react";
+import { Company } from '@/types/company';
+import { ExternalLink, Globe, Users, TrendingUp } from 'lucide-react';
 
 interface CompanySnapshotProps {
   company: Company | null;
@@ -20,7 +20,7 @@ const CompanySnapshot = ({ company }: CompanySnapshotProps) => {
   return (
     <div className="radical-card p-5">
       <h3 className="section-label mb-4">Company Snapshot</h3>
-      
+
       <div className="space-y-4">
         {/* Company Header */}
         <div>
@@ -33,15 +33,19 @@ const CompanySnapshot = ({ company }: CompanySnapshotProps) => {
           <div className="bg-subtle rounded-md p-3">
             <div className="flex items-center gap-2 mb-1">
               <TrendingUp className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground uppercase tracking-[0.08em] font-medium">Stage</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-[0.08em] font-medium">
+                Stage
+              </span>
             </div>
             <p className="text-navy font-medium text-sm">{company.stage}</p>
           </div>
-          
+
           <div className="bg-subtle rounded-md p-3">
             <div className="flex items-center gap-2 mb-1">
               <Users className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-[10px] text-muted-foreground uppercase tracking-[0.08em] font-medium">Team</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-[0.08em] font-medium">
+                Team
+              </span>
             </div>
             <p className="text-navy font-medium text-sm">{company.teamSize} people</p>
           </div>

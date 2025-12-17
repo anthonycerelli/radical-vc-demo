@@ -24,4 +24,3 @@ describe('AnalyticsCharts', () => {
     expect(yearChart).toBeInTheDocument();
   });
 });
-

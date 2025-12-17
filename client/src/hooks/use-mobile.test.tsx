@@ -8,7 +8,7 @@ describe('useIsMobile', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Mock matchMedia
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
@@ -62,7 +62,7 @@ describe('useIsMobile', () => {
 
   it('should update when matchMedia change event fires', () => {
     let changeHandler: (() => void) | null = null;
-    
+
     const mockMatchMedia = vi.fn().mockImplementation((query) => {
       const mql = {
         matches: false,
@@ -136,4 +136,3 @@ describe('useIsMobile', () => {
     expect(removeEventListener).toHaveBeenCalled();
   });
 });
-

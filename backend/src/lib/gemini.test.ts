@@ -8,7 +8,14 @@ vi.mock('dotenv', () => ({
 }));
 
 // Import after mocking
-import { generateEmbedding, generateChatCompletion, genAI, EMBEDDING_MODEL, EMBEDDING_DIMENSIONS, CHAT_MODEL } from './gemini.js';
+import {
+  generateEmbedding,
+  generateChatCompletion,
+  genAI,
+  EMBEDDING_MODEL,
+  EMBEDDING_DIMENSIONS,
+  CHAT_MODEL,
+} from './gemini.js';
 
 describe('Gemini library', () => {
   beforeEach(() => {
@@ -99,10 +106,7 @@ describe('Gemini library', () => {
 
       vi.spyOn(genAI, 'getGenerativeModel').mockReturnValue(mockModel as any);
 
-      const result = await generateChatCompletion(
-        'You are a helpful assistant',
-        'What is AI?'
-      );
+      const result = await generateChatCompletion('You are a helpful assistant', 'What is AI?');
 
       expect(result).toBe('Test response');
       expect(mockModel.generateContent).toHaveBeenCalled();
@@ -139,9 +143,7 @@ describe('Gemini library', () => {
 
       vi.spyOn(genAI, 'getGenerativeModel').mockReturnValue(mockModel as any);
 
-      await expect(
-        generateChatCompletion('System prompt', 'User message')
-      ).rejects.toThrow();
+      await expect(generateChatCompletion('System prompt', 'User message')).rejects.toThrow();
     });
   });
 });

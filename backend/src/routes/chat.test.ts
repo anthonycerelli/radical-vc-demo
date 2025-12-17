@@ -40,7 +40,12 @@ describe('Chat route', () => {
       const mockEmbedding = new Array(768).fill(0.1);
       const mockCompanies = [
         {
-          company: { id: '1', name: 'Company A', slug: 'company-a', radical_primary_category: 'AI' },
+          company: {
+            id: '1',
+            name: 'Company A',
+            slug: 'company-a',
+            radical_primary_category: 'AI',
+          },
           distance: 0.2,
         },
       ];
@@ -144,12 +149,10 @@ describe('Chat route', () => {
       vi.mocked(supabaseClient.supabase.from).mockReturnValue(companyQuery as any);
       vi.mocked(geminiLib.generateChatCompletion).mockResolvedValue(mockAnswer);
 
-      const response = await request(app)
-        .post('/api/chat')
-        .send({
-          message: 'test message',
-          selectedCompanySlug: 'selected-company',
-        });
+      const response = await request(app).post('/api/chat').send({
+        message: 'test message',
+        selectedCompanySlug: 'selected-company',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.sources).toContainEqual({
@@ -162,9 +165,7 @@ describe('Chat route', () => {
     it('should handle errors', async () => {
       vi.mocked(geminiLib.generateEmbedding).mockRejectedValue(new Error('API error'));
 
-      const response = await request(app)
-        .post('/api/chat')
-        .send({ message: 'test message' });
+      const response = await request(app).post('/api/chat').send({ message: 'test message' });
 
       expect(response.status).toBe(500);
       expect(response.body.error).toBeDefined();
@@ -213,12 +214,9 @@ describe('Chat route', () => {
 
       vi.mocked(geminiLib.generateChatCompletion).mockResolvedValue('Answer');
 
-      const response = await request(app)
-        .post('/api/chat')
-        .send({ message: 'test message' });
+      const response = await request(app).post('/api/chat').send({ message: 'test message' });
 
       expect(response.status).toBe(200);
     });
   });
 });
-

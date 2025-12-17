@@ -22,4 +22,3 @@ describe('Navbar', () => {
     expect(screen.getByText('Settings')).toBeInTheDocument();
   });
 });
-

@@ -1,26 +1,24 @@
-import { useState, useMemo, lazy, Suspense } from "react";
-import Navbar from "@/components/layout/Navbar";
-import FiltersPanel from "@/components/filters/FiltersPanel";
-import PortfolioList from "@/components/portfolio/PortfolioList";
-import CompanySnapshot from "@/components/portfolio/CompanySnapshot";
-import CopilotChat from "@/components/copilot/CopilotChat";
-import { mockCompanies } from "@/data/mockCompanies";
-import { Company } from "@/types/company";
+import { useState, useMemo, lazy, Suspense } from 'react';
+import Navbar from '@/components/layout/Navbar';
+import FiltersPanel from '@/components/filters/FiltersPanel';
+import PortfolioList from '@/components/portfolio/PortfolioList';
+import CompanySnapshot from '@/components/portfolio/CompanySnapshot';
+import CopilotChat from '@/components/copilot/CopilotChat';
+import { mockCompanies } from '@/data/mockCompanies';
+import { Company } from '@/types/company';
 
 // Lazy load AnalyticsCharts since it includes recharts (large dependency)
-const AnalyticsCharts = lazy(() => import("@/components/analytics/AnalyticsCharts"));
+const AnalyticsCharts = lazy(() => import('@/components/analytics/AnalyticsCharts'));
 
 const Index = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedYear, setSelectedYear] = useState("All Years");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedYear, setSelectedYear] = useState('All Years');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
+      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
     );
   };
 
@@ -38,14 +36,12 @@ const Index = () => {
 
       // Category filter
       if (selectedCategories.length > 0) {
-        const hasCategory = company.categories.some((cat) =>
-          selectedCategories.includes(cat)
-        );
+        const hasCategory = company.categories.some((cat) => selectedCategories.includes(cat));
         if (!hasCategory) return false;
       }
 
       // Year filter
-      if (selectedYear !== "All Years" && company.year !== selectedYear) {
+      if (selectedYear !== 'All Years' && company.year !== selectedYear) {
         return false;
       }
 
@@ -56,7 +52,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      
+
       <div className="flex-1 flex flex-col lg:flex-row">
         {/* Left: Filters */}
         <FiltersPanel

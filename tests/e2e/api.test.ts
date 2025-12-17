@@ -2,16 +2,16 @@ import { describe, it, expect, beforeAll } from 'vitest';
 
 /**
  * E2E API Tests
- * 
+ *
  * These tests should:
  * - Hit real HTTP endpoints (e.g., http://localhost:3001)
  * - Test full request/response cycles
  * - Not import React components or server internals directly
- * 
+ *
  * To run these tests:
  * 1. Start the backend server: cd backend && npm run dev
  * 2. Run: npm run test:e2e
- * 
+ *
  * Note: These tests will be skipped if the server is not running
  */
 
@@ -53,4 +53,3 @@ describe.skipIf(!serverAvailable)('E2E API Tests', () => {
     expect(data).toHaveProperty('error');
   });
 });
-

@@ -12,24 +12,24 @@
     --navy: 209 100% 25%;
     --navy-hover: 209 100% 25%;
     --navy-dark: 209 100% 17%;
-    
+
     /* Primary Accent Magenta - #FF2C8B */
     --magenta: 335 100% 59%;
     --magenta-hover: 335 79% 49%;
     --magenta-light: 335 100% 70%;
-    
+
     /* Secondary Accent Teal - #00A9C4 */
     --teal: 189 100% 38%;
-    
+
     /* Backgrounds */
     --background: 0 0% 100%;
     --background-subtle: 218 33% 97%;
-    
+
     /* Grays - #E1E4EB, #7A8497, #9AA3B5 */
     --border-gray: 224 17% 91%;
     --muted-text: 220 12% 54%;
     --label-gray: 220 14% 66%;
-    
+
     /* Semantic tokens */
     --foreground: 209 100% 17%;
     --card: 0 0% 100%;
@@ -50,7 +50,7 @@
     --input: 224 17% 91%;
     --ring: 335 100% 59%;
     --radius: 0.375rem;
-    
+
     /* Chart colors */
     --chart-1: 209 100% 25%;
     --chart-2: 335 100% 59%;
@@ -90,8 +90,13 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply text-navy-dark font-semibold tracking-tight;
   }
 }
@@ -101,39 +106,39 @@
   .section-label {
     @apply text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground;
   }
-  
+
   /* Card styling */
   .radical-card {
     @apply bg-card border border-border rounded-md transition-all duration-150;
   }
-  
+
   /* Filter chip styles */
   .filter-chip {
     @apply px-3 py-1.5 text-sm font-medium rounded-md border transition-all duration-150;
   }
-  
+
   .filter-chip-default {
     @apply filter-chip bg-background text-navy border-border hover:border-navy cursor-pointer;
   }
-  
+
   .filter-chip-active {
     @apply filter-chip bg-magenta text-white border-magenta cursor-pointer;
   }
-  
+
   /* Company card */
   .company-card {
     @apply radical-card p-4 cursor-pointer hover:border-navy;
   }
-  
+
   /* Chat bubble styles */
   .chat-bubble-assistant {
     @apply bg-secondary text-navy-dark rounded-lg px-4 py-3;
   }
-  
+
   .chat-bubble-user {
     @apply bg-navy text-white rounded-lg px-4 py-3;
   }
-  
+
   /* Category pill - subtle background style */
   .category-pill {
     @apply inline-flex items-center px-2 py-0.5 text-xs font-medium rounded bg-subtle text-navy border border-border;
@@ -144,51 +149,51 @@
   .text-navy {
     color: hsl(var(--navy));
   }
-  
+
   .text-navy-dark {
     color: hsl(var(--navy-dark));
   }
-  
+
   .text-muted-gray {
     color: hsl(var(--muted-text));
   }
-  
+
   .text-label-gray {
     color: hsl(var(--label-gray));
   }
-  
+
   .bg-navy {
     background-color: hsl(var(--navy));
   }
-  
+
   .bg-magenta {
     background-color: hsl(var(--magenta));
   }
-  
+
   .bg-magenta-hover {
     background-color: hsl(var(--magenta-hover));
   }
-  
+
   .bg-teal {
     background-color: hsl(var(--teal));
   }
-  
+
   .bg-subtle {
     background-color: hsl(var(--background-subtle));
   }
-  
+
   .border-navy {
     border-color: hsl(var(--navy));
   }
-  
+
   .border-magenta {
     border-color: hsl(var(--magenta));
   }
-  
+
   .ring-magenta {
     --tw-ring-color: hsl(var(--magenta));
   }
-  
+
   .focus-magenta:focus {
     @apply outline-none ring-2 ring-magenta ring-offset-1;
   }

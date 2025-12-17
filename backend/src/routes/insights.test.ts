@@ -196,4 +196,3 @@ describe('Insights route', () => {
     });
   });
 });
-

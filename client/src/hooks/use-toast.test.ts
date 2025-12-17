@@ -30,7 +30,7 @@ describe('useToast', () => {
 
   it('should add a toast', () => {
     const { result } = renderHook(() => useToast());
-    
+
     act(() => {
       result.current.toast({ title: 'Test Toast' });
     });
@@ -42,7 +42,7 @@ describe('useToast', () => {
 
   it('should dismiss a toast', () => {
     const { result } = renderHook(() => useToast());
-    
+
     let toastId: string;
     act(() => {
       const toastResult = result.current.toast({ title: 'Test Toast' });
@@ -60,7 +60,7 @@ describe('useToast', () => {
 
   it('should dismiss all toasts when no id provided', () => {
     const { result } = renderHook(() => useToast());
-    
+
     act(() => {
       result.current.toast({ title: 'Toast 1' });
       result.current.toast({ title: 'Toast 2' });
@@ -74,12 +74,12 @@ describe('useToast', () => {
       result.current.dismiss();
     });
 
-    expect(result.current.toasts.every(t => !t.open)).toBe(true);
+    expect(result.current.toasts.every((t) => !t.open)).toBe(true);
   });
 
   it('should update a toast', () => {
     const { result } = renderHook(() => useToast());
-    
+
     let toastResult: ReturnType<typeof toast>;
     act(() => {
       toastResult = result.current.toast({ title: 'Test Toast' });
@@ -94,7 +94,7 @@ describe('useToast', () => {
 
   it('should limit toasts to TOAST_LIMIT', () => {
     const { result } = renderHook(() => useToast());
-    
+
     act(() => {
       result.current.toast({ title: 'Toast 1' });
       result.current.toast({ title: 'Toast 2' });
@@ -108,7 +108,7 @@ describe('useToast', () => {
 
   it('should handle toast onOpenChange', () => {
     const { result } = renderHook(() => useToast());
-    
+
     act(() => {
       result.current.toast({ title: 'Test Toast' });
     });
@@ -187,7 +187,7 @@ describe('toast reducer', () => {
     };
 
     const newState = reducer(state, action);
-    expect(newState.toasts.every(t => !t.open)).toBe(true);
+    expect(newState.toasts.every((t) => !t.open)).toBe(true);
   });
 
   it('should handle REMOVE_TOAST action with toastId', () => {
@@ -222,4 +222,3 @@ describe('toast reducer', () => {
     expect(newState.toasts).toHaveLength(0);
   });
 });
-

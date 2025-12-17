@@ -1,24 +1,24 @@
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 const categories = [
-  "Climate",
-  "LLMs",
-  "Robotics",
-  "Healthcare",
-  "Enterprise",
-  "Biotech",
-  "Infrastructure",
+  'Climate',
+  'LLMs',
+  'Robotics',
+  'Healthcare',
+  'Enterprise',
+  'Biotech',
+  'Infrastructure',
 ];
 
-const years = ["2024", "2023", "2022", "2021", "2020", "2019", "All Years"];
+const years = ['2024', '2023', '2022', '2021', '2020', '2019', 'All Years'];
 
 interface FiltersPanelProps {
   selectedCategories: string[];
@@ -41,7 +41,7 @@ const FiltersPanel = ({
     <aside className="w-64 bg-background border-r border-border p-5 flex flex-col gap-6">
       <div>
         <h2 className="section-label mb-4">Filters</h2>
-        
+
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -65,7 +65,7 @@ const FiltersPanel = ({
               <button
                 key={category}
                 onClick={() => onCategoryToggle(category)}
-                className={isActive ? "filter-chip-active" : "filter-chip-default"}
+                className={isActive ? 'filter-chip-active' : 'filter-chip-default'}
               >
                 {category}
               </button>
@@ -94,7 +94,7 @@ const FiltersPanel = ({
       {/* Quick Stats */}
       <div className="mt-auto pt-4 border-t border-border">
         <p className="text-xs text-muted-foreground">
-          Showing <span className="font-semibold text-navy">12</span> of{" "}
+          Showing <span className="font-semibold text-navy">12</span> of{' '}
           <span className="font-semibold text-navy">48</span> companies
         </p>
       </div>

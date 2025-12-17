@@ -51,4 +51,3 @@ describe('NotFound', () => {
     expect(homeLink).toHaveAttribute('href', '/');
   });
 });
-

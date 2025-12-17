@@ -53,7 +53,15 @@ describe('FiltersPanel', () => {
   it('should render all category buttons', () => {
     render(<FiltersPanel {...defaultProps} />);
 
-    const categories = ['Climate', 'LLMs', 'Robotics', 'Healthcare', 'Enterprise', 'Biotech', 'Infrastructure'];
+    const categories = [
+      'Climate',
+      'LLMs',
+      'Robotics',
+      'Healthcare',
+      'Enterprise',
+      'Biotech',
+      'Infrastructure',
+    ];
     categories.forEach((category) => {
       expect(screen.getByText(category)).toBeInTheDocument();
     });
@@ -96,4 +104,3 @@ describe('FiltersPanel', () => {
     expect(screen.getByText(/companies/i)).toBeInTheDocument();
   });
 });
-

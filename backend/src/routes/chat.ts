@@ -220,4 +220,3 @@ function cosineDistance(a: number[], b: number[]): number {
 }
 
 export default router;
-

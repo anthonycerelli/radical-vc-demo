@@ -47,11 +47,7 @@ describe('PortfolioList', () => {
 
   it('should display company descriptions', () => {
     render(
-      <PortfolioList
-        companies={mockCompanies}
-        selectedCompany={null}
-        onSelectCompany={vi.fn()}
-      />
+      <PortfolioList companies={mockCompanies} selectedCompany={null} onSelectCompany={vi.fn()} />
     );
 
     expect(screen.getByText('Test description 1')).toBeInTheDocument();
@@ -60,11 +56,7 @@ describe('PortfolioList', () => {
 
   it('should display company categories', () => {
     render(
-      <PortfolioList
-        companies={mockCompanies}
-        selectedCompany={null}
-        onSelectCompany={vi.fn()}
-      />
+      <PortfolioList companies={mockCompanies} selectedCompany={null} onSelectCompany={vi.fn()} />
     );
 
     expect(screen.getByText('AI')).toBeInTheDocument();
@@ -74,11 +66,7 @@ describe('PortfolioList', () => {
 
   it('should display company year', () => {
     render(
-      <PortfolioList
-        companies={mockCompanies}
-        selectedCompany={null}
-        onSelectCompany={vi.fn()}
-      />
+      <PortfolioList companies={mockCompanies} selectedCompany={null} onSelectCompany={vi.fn()} />
     );
 
     expect(screen.getByText('2023')).toBeInTheDocument();
@@ -99,7 +87,7 @@ describe('PortfolioList', () => {
     // Find the company name and click on its parent card
     const companyName = screen.getByText('Test Company 1');
     const companyCard = companyName.closest('div[class*="company-card"]');
-    
+
     if (companyCard) {
       await user.click(companyCard);
       expect(onSelectCompany).toHaveBeenCalledWith(mockCompanies[0]);
@@ -142,16 +130,9 @@ describe('PortfolioList', () => {
   });
 
   it('should handle empty company list', () => {
-    render(
-      <PortfolioList
-        companies={[]}
-        selectedCompany={null}
-        onSelectCompany={vi.fn()}
-      />
-    );
+    render(<PortfolioList companies={[]} selectedCompany={null} onSelectCompany={vi.fn()} />);
 
     expect(screen.getByText('Portfolio Companies')).toBeInTheDocument();
     expect(screen.queryByText('Test Company 1')).not.toBeInTheDocument();
   });
 });
-

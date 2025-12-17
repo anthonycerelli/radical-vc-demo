@@ -34,6 +34,7 @@ cp .env.example .env
 ```
 
 Required environment variables:
+
 - `SUPABASE_URL`: Your Supabase project URL
 - `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key (for admin operations)
 - `GEMINI_API_KEY`: Your Google Gemini API key
@@ -44,36 +45,43 @@ Required environment variables:
 Execute the migration files in order against your Supabase database:
 
 1. **Enable pgvector extension**:
+
    ```sql
    -- Run migrations/001_init_pgvector.sql
    ```
 
 2. **Create companies table**:
+
    ```sql
    -- Run migrations/002_create_companies.sql
    ```
 
 3. **Create embeddings table**:
+
    ```sql
    -- Run migrations/003_create_company_embeddings.sql
    ```
 
 4. **Create search function**:
+
    ```sql
    -- Run migrations/004_create_search_function.sql
    ```
 
 5. **Enable RLS policies**:
+
    ```sql
    -- Run migrations/006_enable_rls_policies.sql
    ```
 
 6. **Fix security warnings**:
+
    ```sql
    -- Run migrations/007_fix_security_warnings.sql
    ```
 
 7. **Move vector extension** (if needed):
+
    ```sql
    -- Run migrations/008_move_vector_extension.sql
    ```
@@ -84,6 +92,7 @@ Execute the migration files in order against your Supabase database:
    ```
 
 You can run these migrations via:
+
 - Supabase Dashboard SQL Editor
 - Supabase CLI: `supabase db push`
 - psql: `psql -h <host> -U <user> -d <database> -f migrations/001_init_pgvector.sql`
@@ -97,6 +106,7 @@ npm run import
 ```
 
 This script will:
+
 - Read the JSON file
 - Upsert companies into the database
 - Generate embeddings for each company using Google Gemini (768 dimensions)
@@ -107,11 +117,13 @@ The import is idempotent - you can run it multiple times safely.
 ### 5. Start the Server
 
 **Development mode** (with hot reload):
+
 ```bash
 npm run dev
 ```
 
 **Production mode**:
+
 ```bash
 npm run build
 npm start
@@ -138,6 +150,7 @@ GET /api/companies?q=search&category=AI&year=2023&limit=20&offset=0
 ```
 
 **Query Parameters:**
+
 - `q` (optional): Text search term (searches name and description)
 - `category` (optional): Filter by category (comma-separated for multiple)
 - `year` (optional): Filter by investment year
@@ -145,6 +158,7 @@ GET /api/companies?q=search&category=AI&year=2023&limit=20&offset=0
 - `offset` (optional, default: 0): Pagination offset
 
 **Response:**
+
 ```json
 {
   "companies": [
@@ -172,6 +186,7 @@ GET /api/companies/:slug
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -192,6 +207,7 @@ GET /api/insights/summary
 ```
 
 **Response:**
+
 ```json
 {
   "byCategory": [
@@ -221,11 +237,13 @@ Content-Type: application/json
 ```
 
 **Request Body:**
+
 - `message` (required): User's question
 - `selectedCompanySlug` (optional): Currently selected company slug for context
 - `topK` (optional, default: 5, max: 10): Number of similar companies to retrieve
 
 **Response:**
+
 ```json
 {
   "answer": "Based on the portfolio, there are several AI companies...",
@@ -240,6 +258,7 @@ Content-Type: application/json
 ```
 
 The chat endpoint:
+
 1. Generates an embedding for the user's message
 2. Performs semantic search over company embeddings
 3. Retrieves top-k similar companies
@@ -250,26 +269,31 @@ The chat endpoint:
 ## Example Requests
 
 ### List all companies
+
 ```bash
 curl http://localhost:3001/api/companies
 ```
 
 ### Search companies
+
 ```bash
 curl "http://localhost:3001/api/companies?q=AI&category=Machine%20Learning&limit=10"
 ```
 
 ### Get company by slug
+
 ```bash
 curl http://localhost:3001/api/companies/example-company
 ```
 
 ### Get portfolio insights
+
 ```bash
 curl http://localhost:3001/api/insights/summary
 ```
 
 ### Chat with copilot
+
 ```bash
 curl -X POST http://localhost:3001/api/chat \
   -H "Content-Type: application/json" \
@@ -337,6 +361,7 @@ All endpoints return JSON error responses in the format:
 ```
 
 HTTP status codes:
+
 - `200`: Success
 - `400`: Bad request (validation errors)
 - `404`: Not found
@@ -363,4 +388,3 @@ Check that your `GEMINI_API_KEY` is valid and has sufficient quota. The import s
 ### Database connection errors
 
 Verify your `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are correct. The service role key is required for admin operations like data import.
-
