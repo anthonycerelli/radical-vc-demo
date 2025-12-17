@@ -7,7 +7,7 @@ Backend API for the Radical Portfolio Copilot internal tool. Provides REST endpo
 - **Language**: TypeScript (Node.js)
 - **Database**: Supabase PostgreSQL with pgvector extension
 - **Vector Store**: pgvector for semantic search
-- **LLM/Embeddings**: Google Gemini (gemini-pro and text-embedding-004)
+- **LLM/Embeddings**: Google Gemini (gemini-2.5-flash for chat, text-embedding-004 for embeddings)
 - **Framework**: Express.js
 
 ## Prerequisites
@@ -244,7 +244,7 @@ The chat endpoint:
 2. Performs semantic search over company embeddings
 3. Retrieves top-k similar companies
 4. Builds context including selected company (if provided) and similar companies
-5. Calls Google Gemini (gemini-pro) to generate an answer
+5. Calls Google Gemini (gemini-2.5-flash) to generate an answer
 6. Returns the answer with cited sources
 
 ## Example Requests
@@ -345,8 +345,8 @@ HTTP status codes:
 ## Notes
 
 - The vector search uses cosine distance for similarity matching
-- Embeddings are generated using Google Gemini's `text-embedding-004` model (768 dimensions)
-- The chat endpoint uses Gemini Pro for generating responses
+- Embeddings are generated using Google Gemini's `text-embedding-004` model (768 dimensions) - dedicated embedding model for semantic search
+- The chat endpoint uses `gemini-2.5-flash` for generating responses (free tier: 5 RPM / 250k TPM)
 - The import script is idempotent and safe to run multiple times
 - Category filtering supports both primary category and array overlap matching
 

@@ -12,79 +12,113 @@ if (!geminiApiKey) {
 export const genAI = new GoogleGenerativeAI(geminiApiKey);
 
 // Embedding model configuration
-// Note: Gemini uses text-embedding-004 for embeddings via the REST API
-// We'll use the embedding model through the Generative AI SDK
+// Using text-embedding-004 - dedicated embedding model for semantic search
 export const EMBEDDING_MODEL = 'text-embedding-004';
-export const EMBEDDING_DIMENSIONS = 768; // Gemini embeddings are 768 dimensions
+export const EMBEDDING_DIMENSIONS = 768; // Default dimension for text-embedding-004
 
 // Chat model configuration
-export const CHAT_MODEL = 'gemini-pro';
+// Using gemini-2.5-flash for chat/completions (free tier: 5 RPM / 250k TPM)
+export const CHAT_MODEL = 'gemini-2.5-flash';
 
 /**
- * Generate embedding for text using Gemini
- * Note: Gemini embeddings are 768 dimensions, not 1536 like OpenAI
+ * Generate embedding for text using Gemini text-embedding-004
+ * Returns 768-dimensional vector for semantic search
+ * Uses the dedicated embedding model via the Gemini API
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
-  // Gemini doesn't have a direct embeddings API in the SDK
-  // We need to use the REST API for embeddings
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${EMBEDDING_MODEL}:embedContent?key=${geminiApiKey}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: `models/${EMBEDDING_MODEL}`,
-        content: {
-          parts: [{ text }],
-        },
-      }),
+  try {
+    // Try using the SDK's embedContent method if available
+    // Otherwise fallback to REST API
+    let embedding: number[] | undefined;
+
+    // Try SDK method first (if the method exists on the client)
+    try {
+      // @ts-ignore - embedContent might not be in types but could exist at runtime
+      if (typeof genAI.embedContent === 'function') {
+        const result = await (genAI as any).embedContent({
+          model: EMBEDDING_MODEL,
+          contents: [text],
+        });
+        
+        // Response structure: { embeddings: [{ values: [...] }] }
+        if (result.embeddings && result.embeddings[0]?.values) {
+          embedding = result.embeddings[0].values;
+        }
+      }
+    } catch (sdkError) {
+      // Fall through to REST API
     }
-  );
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Gemini embedding API error: ${error}`);
-  }
+    // Fallback to REST API if SDK method didn't work
+    if (!embedding) {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${EMBEDDING_MODEL}:embedContent?key=${geminiApiKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: `models/${EMBEDDING_MODEL}`,
+            content: {
+              parts: [{ text }],
+            },
+          }),
+        }
+      );
 
-  const data = await response.json();
-  
-  // Handle the response structure
-  if (data.embedding && data.embedding.values) {
-    return data.embedding.values;
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Gemini embedding API error: ${error}`);
+      }
+
+      const data = await response.json();
+      embedding = data.embedding?.values;
+    }
+    
+    if (!embedding || !Array.isArray(embedding)) {
+      throw new Error('Invalid embedding response format');
+    }
+    
+    if (embedding.length !== EMBEDDING_DIMENSIONS) {
+      throw new Error(`Expected embedding of length ${EMBEDDING_DIMENSIONS}, got ${embedding.length}`);
+    }
+
+    return embedding;
+  } catch (error: any) {
+    throw new Error(`Failed to generate embedding: ${error.message}`);
   }
-  
-  // Fallback: sometimes the response structure is different
-  if (Array.isArray(data.embedding)) {
-    return data.embedding;
-  }
-  
-  throw new Error('Unexpected response format from Gemini embedding API');
 }
 
 /**
- * Generate chat completion using Gemini
+ * Generate chat completion using Gemini gemini-2.5-flash
+ * Combines system prompt, context, and user message into a structured conversation
  */
 export async function generateChatCompletion(
   systemPrompt: string,
   userMessage: string,
   context?: string
 ): Promise<string> {
-  const model = genAI.getGenerativeModel({ model: CHAT_MODEL });
+  const model = genAI.getGenerativeModel({ 
+    model: CHAT_MODEL,
+    systemInstruction: systemPrompt,
+  });
 
-  // Combine system prompt and context into a single prompt
-  let fullPrompt = systemPrompt;
-  
+  // Build the user message with context if provided
+  let userContent = userMessage;
   if (context) {
-    fullPrompt += `\n\nContext:\n${context}`;
+    userContent = `Context:\n${context}\n\nUser Question: ${userMessage}`;
   }
-  
-  fullPrompt += `\n\nUser: ${userMessage}`;
 
-  const result = await model.generateContent(fullPrompt);
-  const response = await result.response;
-  
-  return response.text();
+  try {
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: userContent }] }],
+    });
+
+    const response = await result.response;
+    return response.text();
+  } catch (error: any) {
+    throw new Error(`Failed to generate chat completion: ${error.message}`);
+  }
 }
 
