@@ -196,42 +196,43 @@ router.post('/', async (req: Request, res: Response) => {
 
       // If no companies found, try a fallback: use keyword search or fetch all companies
       if (topCompanies.length === 0) {
-      console.warn('No companies found from vector search, trying keyword fallback');
-      
-      // Try keyword-based search as fallback
-      const searchTerms = message.toLowerCase().split(/\s+/).filter((w) => w.length > 3);
-      const keywordQuery = searchTerms.join(' | ');
-      
-      if (keywordQuery) {
-        const { data: keywordResults, error: keywordError } = await supabase
-          .from('companies')
-          .select('*')
-          .or(`name.ilike.%${searchTerms[0]}%,description.ilike.%${searchTerms[0]}%,radical_primary_category.ilike.%${searchTerms[0]}%`)
-          .limit(topK);
+        console.warn('No companies found from vector search, trying keyword fallback');
+        
+        // Try keyword-based search as fallback
+        const searchTerms = message.toLowerCase().split(/\s+/).filter((w) => w.length > 3);
+        const keywordQuery = searchTerms.join(' | ');
+        
+        if (keywordQuery) {
+          const { data: keywordResults, error: keywordError } = await supabase
+            .from('companies')
+            .select('*')
+            .or(`name.ilike.%${searchTerms[0]}%,description.ilike.%${searchTerms[0]}%,radical_primary_category.ilike.%${searchTerms[0]}%`)
+            .limit(topK);
 
-        if (!keywordError && keywordResults && keywordResults.length > 0) {
-          topCompanies = keywordResults.map((company) => ({
-            company: company as Company,
-            distance: 0.8, // Medium distance for keyword match
-          }));
-          console.log('Keyword fallback: found', topCompanies.length, 'companies');
+          if (!keywordError && keywordResults && keywordResults.length > 0) {
+            topCompanies = keywordResults.map((company) => ({
+              company: company as Company,
+              distance: 0.8, // Medium distance for keyword match
+            }));
+            console.log('Keyword fallback: found', topCompanies.length, 'companies');
+          }
         }
-      }
 
-      // If still no results, fetch all companies and let LLM filter
-      if (topCompanies.length === 0) {
-        console.warn('No keyword matches, falling back to all companies');
-        const { data: allCompaniesData, error: allError } = await supabase
-          .from('companies')
-          .select('*')
-          .limit(30); // Limit to avoid too much context
+        // If still no results, fetch all companies and let LLM filter
+        if (topCompanies.length === 0) {
+          console.warn('No keyword matches, falling back to all companies');
+          const { data: allCompaniesData, error: allError } = await supabase
+            .from('companies')
+            .select('*')
+            .limit(30); // Limit to avoid too much context
 
-        if (!allError && allCompaniesData && allCompaniesData.length > 0) {
-          topCompanies = allCompaniesData.map((company) => ({
-            company: company as Company,
-            distance: 1.0, // High distance since not matched
-          }));
-          console.log('Final fallback: using', topCompanies.length, 'companies from database');
+          if (!allError && allCompaniesData && allCompaniesData.length > 0) {
+            topCompanies = allCompaniesData.map((company) => ({
+              company: company as Company,
+              distance: 1.0, // High distance since not matched
+            }));
+            console.log('Final fallback: using', topCompanies.length, 'companies from database');
+          }
         }
       }
     }
