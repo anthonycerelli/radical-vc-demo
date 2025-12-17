@@ -3,7 +3,7 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "node_modules", "**/*.config.js"] },
+  { ignores: ["dist", "node_modules", "**/*.config.js", "coverage/**", "**/coverage/**"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.ts"],
@@ -34,6 +34,13 @@ export default tseslint.config(
     files: ["scripts/**/*.ts", "src/server.ts"],
     rules: {
       "no-console": "off",
+    },
+  },
+  {
+    // Allow `any` types in test files for mocking
+    files: ["**/*.test.ts", "**/*.spec.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
     },
   }
 );
