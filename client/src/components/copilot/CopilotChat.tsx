@@ -37,7 +37,7 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isLoading]);
 
   useEffect(() => {
     if (company) {
@@ -135,6 +135,24 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
             </div>
           </div>
         ))}
+        {/* Typing indicator */}
+        {isLoading && (
+          <div className="flex gap-3 animate-fade-in">
+            <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 bg-subtle text-navy">
+              <Bot className="w-4 h-4" />
+            </div>
+            <div className="max-w-[80%] chat-bubble-assistant">
+              <div className="flex items-center gap-1 py-1">
+                <span className="text-sm text-muted-foreground">Thinking</span>
+                <div className="flex gap-1">
+                  <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:0ms]" />
+                  <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:150ms]" />
+                  <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:300ms]" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
 
