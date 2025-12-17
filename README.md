@@ -1,73 +1,127 @@
-# Welcome to your Lovable project
+# Radical Portfolio Copilot
 
-## Project info
+AI-native internal tool for Radical Ventures portfolio analysis, company insights, and investment intelligence.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Project Structure
 
-## How can I edit this code?
+```
+radical-demo/
+├── client/          # React + Vite frontend
+├── backend/         # Express + TypeScript backend
+└── package.json     # Root package.json with CI scripts
+```
 
-There are several ways of editing your application.
+## Quick Start
 
-**Use Lovable**
+### Install Dependencies
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+```bash
+npm run install:all
+```
 
-Changes made via Lovable will be committed automatically to this repo.
+Or individually:
+```bash
+cd client && npm install
+cd ../backend && npm install
+```
 
-**Use your preferred IDE**
+### Development
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+**Frontend:**
+```bash
+cd client
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+**Backend:**
+```bash
+cd backend
+npm run dev
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## CI/CD Scripts
 
-**Use GitHub Codespaces**
+All scripts are run from the root directory:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Type Safety
+```bash
+npm run typecheck          # Check both client and backend
+npm run typecheck:client   # Check client only
+npm run typecheck:backend  # Check backend only
+```
 
-## What technologies are used for this project?
+### Linting
+```bash
+npm run lint              # Lint both client and backend
+npm run lint:client        # Lint client only
+npm run lint:backend       # Lint backend only
+```
 
-This project is built with:
+### Formatting
+```bash
+npm run format:check      # Check formatting
+npm run format:write       # Auto-fix formatting
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Testing
+```bash
+npm run test              # Run tests
+npm run test:watch         # Run tests in watch mode
+npm run test:coverage      # Run tests with coverage (70% threshold)
+```
 
-## How can I deploy this project?
+### Build
+```bash
+npm run build:client      # Build frontend
+npm run build:backend      # Build backend
+```
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Security
+```bash
+npm run audit             # Audit both client and backend
+npm run audit:client       # Audit client only
+npm run audit:backend     # Audit backend only
+```
 
-## Can I connect a custom domain to my Lovable project?
+### Full CI Pipeline
+```bash
+npm run ci                # Runs all checks: typecheck, lint, format, test, build, audit
+```
 
-Yes, you can!
+## CI/CD Pipeline
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+The project includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that runs on:
+- Push to `main` or `develop` branches
+- Pull requests to `main` or `develop` branches
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+The CI pipeline runs:
+1. Type checking
+2. Linting (0 warnings allowed)
+3. Format checking
+4. Tests with coverage (70% threshold)
+5. Build verification (client + backend)
+6. Security audit
+
+## Code Quality Standards
+
+- **TypeScript**: Strict mode enabled with `noUnusedLocals`, `noUnusedParameters`, `noImplicitReturns`
+- **Linting**: ESLint with 0 warnings policy
+- **Formatting**: Prettier with consistent style
+- **Testing**: Vitest with 70% coverage threshold
+- **Security**: Regular npm audit checks
+
+## Additional Tools
+
+### Check for unused dependencies
+```bash
+npx depcheck
+```
+
+### Dead code detection
+TypeScript strict mode is enabled to catch unused code at compile time.
+
+## Environment Setup
+
+See individual READMEs:
+- [Client README](./client/README.md) - Frontend setup
+- [Backend README](./backend/README.md) - Backend setup and API documentation
