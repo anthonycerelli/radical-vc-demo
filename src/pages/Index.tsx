@@ -89,7 +89,7 @@ const Index = () => {
           />
         </main>
 
-        {/* Right: Snapshot + Copilot */}
+        {/* Right: Snapshot + Copilot - subtle background */}
         <aside className="w-full lg:w-96 p-5 space-y-4 bg-subtle">
           <CompanySnapshot company={selectedCompany} />
           <CopilotChat company={selectedCompany} />

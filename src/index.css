@@ -8,26 +8,26 @@
 
 @layer base {
   :root {
-    /* Primary Navy (Ink) */
+    /* Primary Navy (Ink) - #003E7E */
     --navy: 209 100% 25%;
     --navy-hover: 209 100% 25%;
     --navy-dark: 209 100% 17%;
     
-    /* Primary Accent Magenta */
+    /* Primary Accent Magenta - #FF2C8B */
     --magenta: 335 100% 59%;
     --magenta-hover: 335 79% 49%;
     --magenta-light: 335 100% 70%;
     
-    /* Secondary Accent Teal */
+    /* Secondary Accent Teal - #00A9C4 */
     --teal: 189 100% 38%;
     
     /* Backgrounds */
     --background: 0 0% 100%;
-    --background-subtle: 216 33% 97%;
+    --background-subtle: 218 33% 97%;
     
-    /* Grays */
-    --border-gray: 220 17% 91%;
-    --muted-text: 220 12% 56%;
+    /* Grays - #E1E4EB, #7A8497, #9AA3B5 */
+    --border-gray: 224 17% 91%;
+    --muted-text: 220 12% 54%;
     --label-gray: 220 14% 66%;
     
     /* Semantic tokens */
@@ -38,16 +38,16 @@
     --popover-foreground: 209 100% 17%;
     --primary: 209 100% 25%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 216 33% 97%;
+    --secondary: 218 33% 97%;
     --secondary-foreground: 209 100% 25%;
-    --muted: 216 33% 97%;
-    --muted-foreground: 220 12% 56%;
+    --muted: 218 33% 97%;
+    --muted-foreground: 220 12% 54%;
     --accent: 335 100% 59%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 17% 91%;
-    --input: 220 17% 91%;
+    --border: 224 17% 91%;
+    --input: 224 17% 91%;
     --ring: 335 100% 59%;
     --radius: 0.375rem;
     
@@ -56,7 +56,7 @@
     --chart-2: 335 100% 59%;
     --chart-3: 189 100% 38%;
     --chart-4: 220 14% 66%;
-    --chart-5: 216 33% 97%;
+    --chart-5: 218 33% 97%;
   }
 
   .dark {
@@ -97,14 +97,14 @@
 }
 
 @layer components {
-  /* Section labels - all caps with letter spacing */
+  /* Section labels - all caps with letter spacing (editorial style) */
   .section-label {
-    @apply text-xs font-semibold uppercase tracking-wider text-muted-foreground;
+    @apply text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground;
   }
   
   /* Card styling */
   .radical-card {
-    @apply bg-card border border-border rounded-md;
+    @apply bg-card border border-border rounded-md transition-all duration-150;
   }
   
   /* Filter chip styles */
@@ -113,30 +113,30 @@
   }
   
   .filter-chip-default {
-    @apply filter-chip bg-background text-navy border-border hover:border-navy;
+    @apply filter-chip bg-background text-navy border-border hover:border-navy cursor-pointer;
   }
   
   .filter-chip-active {
-    @apply filter-chip bg-magenta text-white border-magenta;
+    @apply filter-chip bg-magenta text-white border-magenta cursor-pointer;
   }
   
   /* Company card */
   .company-card {
-    @apply radical-card p-4 cursor-pointer transition-all duration-150 hover:border-navy;
+    @apply radical-card p-4 cursor-pointer hover:border-navy;
   }
   
   /* Chat bubble styles */
   .chat-bubble-assistant {
-    @apply bg-secondary text-foreground rounded-lg px-4 py-3;
+    @apply bg-secondary text-navy-dark rounded-lg px-4 py-3;
   }
   
   .chat-bubble-user {
     @apply bg-navy text-white rounded-lg px-4 py-3;
   }
   
-  /* Category pill */
+  /* Category pill - subtle background style */
   .category-pill {
-    @apply inline-flex items-center px-2 py-0.5 text-xs font-medium rounded bg-secondary text-navy border border-border;
+    @apply inline-flex items-center px-2 py-0.5 text-xs font-medium rounded bg-subtle text-navy border border-border;
   }
 }
 
