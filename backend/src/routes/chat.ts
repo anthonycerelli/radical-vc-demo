@@ -130,42 +130,130 @@ router.post('/', async (req: Request, res: Response) => {
           });
         }
       }
-    } else if (similarCompanies) {
+    } else if (similarCompanies && Array.isArray(similarCompanies) && similarCompanies.length > 0) {
       // Use RPC results if available
-      topCompanies = similarCompanies.map((item: unknown) => {
-        const companyItem = item as { company?: Company; distance?: number };
+      // The RPC function returns companies directly with a distance field
+      topCompanies = similarCompanies.map((item: Company & { distance?: number }) => {
+        // Extract distance and remove it from the company object
+        const { distance, ...company } = item;
         return {
-          company: companyItem.company as Company,
-          distance: companyItem.distance || 0,
+          company: company as Company,
+          distance: distance || 0,
         };
       });
     }
 
-    // Build context for LLM
-    const contextParts: string[] = [];
+    // Get all portfolio company names for hallucination check
+    const { data: allCompanies } = await supabase
+      .from('companies')
+      .select('name, slug');
+    
+    const portfolioNames = new Set(
+      (allCompanies || []).map((c) => c.name.toLowerCase())
+    );
+    const portfolioSlugs = new Set(
+      (allCompanies || []).map((c) => c.slug.toLowerCase())
+    );
 
-    if (selectedCompany) {
-      contextParts.push(
-        `Selected Company:\n- Name: ${selectedCompany.name}\n- Category: ${selectedCompany.radical_primary_category || 'N/A'}\n- Description: ${selectedCompany.description || 'N/A'}\n- Year: ${selectedCompany.radical_investment_year || 'N/A'}`
-      );
-    }
+    // Build portfolio context as structured JSON
+    const portfolioCompanies = topCompanies.map(({ company }) => ({
+      name: company.name,
+      slug: company.slug,
+      radical_primary_category: company.radical_primary_category,
+      radical_all_categories: company.radical_all_categories,
+      tagline: company.tagline,
+      description: company.description,
+      radical_investment_year: company.radical_investment_year,
+      all_sectors: company.all_sectors,
+      primary_sector: company.primary_sector,
+    }));
 
-    if (topCompanies.length > 0) {
-      contextParts.push('\nSimilar Portfolio Companies:');
-      topCompanies.forEach(({ company }, index) => {
-        contextParts.push(
-          `${index + 1}. ${company.name} (${company.radical_primary_category || 'N/A'}) - ${company.description || company.tagline || 'No description available'}`
-        );
+    // Include selected company if provided
+    if (selectedCompany && !portfolioCompanies.find((c) => c.slug === selectedCompany!.slug)) {
+      portfolioCompanies.unshift({
+        name: selectedCompany.name,
+        slug: selectedCompany.slug,
+        radical_primary_category: selectedCompany.radical_primary_category,
+        radical_all_categories: selectedCompany.radical_all_categories,
+        tagline: selectedCompany.tagline,
+        description: selectedCompany.description,
+        radical_investment_year: selectedCompany.radical_investment_year,
+        all_sectors: selectedCompany.all_sectors,
+        primary_sector: selectedCompany.primary_sector,
       });
     }
 
-    const context = contextParts.join('\n\n');
+    const portfolioContextJson = JSON.stringify(portfolioCompanies, null, 2);
 
-    // Build system prompt
-    const systemPrompt = `You are Radical Portfolio Copilot, an internal assistant for a VC firm. You help analyze Radical Ventures' portfolio of AI-first companies. Answer clearly and concisely, using only the context provided. If you don't know something, say you don't know rather than making it up.`;
+    // Build strict system prompt
+    const systemPrompt = `You are Radical Portfolio Copilot, an internal assistant for Radical Ventures.
+You ONLY know about the companies provided to you in the "portfolio_context" section below.
+
+Rules:
+- When the user asks "which companies...?", you MUST answer ONLY with companies from the portfolio_context.
+- Do NOT mention or invent companies that are not in the portfolio_context, even if you know them from elsewhere.
+- If the portfolio_context does not contain any relevant companies, say so explicitly (e.g. "Based on the provided Radical Ventures portfolio, I do not see any companies focused on X.").
+- When you mention a company, always include its slug and primary category for clarity.
+- Keep answers concise and analytical, grounded in the descriptions and metadata you are given.
+
+If a user asks a general AI/tech question that is not about the Radical Ventures portfolio, you may give a brief generic answer BUT you must clearly label it as "outside portfolio context" and keep it secondary.`;
+
+    // Build user instruction with structured context
+    const userInstruction = `PORTFOLIO_CONTEXT (JSON array of Radical Ventures portfolio companies):
+${portfolioContextJson}
+
+Using ONLY the portfolio_context JSON above, answer the following question:
+
+Question: "${message}"
+
+Respond with:
+- A short sentence summarizing how many companies in the portfolio fit (if applicable).
+- A bullet list of relevant companies, each with:
+  - name
+  - slug
+  - primary category
+  - 1–2 sentences on why they are relevant.
+
+Do NOT mention companies not present in portfolio_context.`;
 
     // Generate LLM response
-    const answer = await generateChatCompletion(systemPrompt, message, context);
+    let answer = await generateChatCompletion(systemPrompt, userInstruction);
+
+    // Hallucination detection - check for non-portfolio companies
+    const forbiddenExamples = [
+      'nvidia',
+      'google',
+      'microsoft',
+      'amazon',
+      'intel',
+      'amd',
+      'openai',
+      'anthropic',
+      'meta',
+      'facebook',
+      'apple',
+      'tesla',
+    ];
+
+    const answerLower = answer.toLowerCase();
+    const hallucinated = forbiddenExamples.filter((name) => answerLower.includes(name));
+
+    if (hallucinated.length > 0) {
+      console.warn('Potential hallucination detected - non-portfolio companies mentioned:', hallucinated);
+
+      // Regenerate with stricter prompt
+      const stricterPrompt = `${systemPrompt}
+
+CRITICAL: The previous response mentioned companies that are NOT in the Radical Ventures portfolio: ${hallucinated.join(', ')}. You must ONLY mention companies from the portfolio_context JSON provided above. Do not mention any companies outside the portfolio_context.`;
+
+      answer = await generateChatCompletion(stricterPrompt, userInstruction);
+      
+      // Log if still hallucinating after regeneration
+      const stillHallucinating = forbiddenExamples.filter((name) => answer.toLowerCase().includes(name));
+      if (stillHallucinating.length > 0) {
+        console.error('Hallucination persisted after regeneration:', stillHallucinating);
+      }
+    }
 
     // Build sources array
     const sources = topCompanies.map(({ company }) => ({
