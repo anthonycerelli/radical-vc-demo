@@ -103,17 +103,30 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Scroll to show the top of the new message instead of bottom
+    // Scroll within the chat container to show the top of the new message
     if (messagesContainerRef.current && messages.length > 1) {
       // Find the last message element
       const lastMessageId = messages[messages.length - 1]?.id;
       if (lastMessageId) {
         const lastMessage = messagesContainerRef.current.querySelector(
           `[data-message-id="${lastMessageId}"]`
-        );
-        if (lastMessage && typeof (lastMessage as HTMLElement).scrollIntoView === 'function') {
-          // Scroll to show the top of the new message
-          (lastMessage as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        ) as HTMLElement;
+        if (lastMessage && messagesContainerRef.current) {
+          // Calculate the position relative to the container
+          const container = messagesContainerRef.current;
+          const messageTop = lastMessage.offsetTop;
+
+          // Scroll the container to show the top of the new message
+          // This keeps the scroll within the chat div, not the entire page
+          if (typeof container.scrollTo === 'function') {
+            container.scrollTo({
+              top: messageTop,
+              behavior: 'smooth',
+            });
+          } else {
+            // Fallback for environments without scrollTo
+            container.scrollTop = messageTop;
+          }
         }
       }
     }

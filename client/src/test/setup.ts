@@ -27,6 +27,9 @@ Object.defineProperty(window, 'matchMedia', {
 // Mock scrollIntoView (not available in jsdom)
 Element.prototype.scrollIntoView = vi.fn();
 
+// Mock scrollTo for HTMLElement (needed for container scrolling)
+HTMLElement.prototype.scrollTo = vi.fn();
+
 // Cleanup after each test
 afterEach(() => {
   cleanup();
