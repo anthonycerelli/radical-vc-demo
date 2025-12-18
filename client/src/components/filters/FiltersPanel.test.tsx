@@ -11,6 +11,18 @@ describe('FiltersPanel', () => {
     onYearChange: vi.fn(),
     searchQuery: '',
     onSearchChange: vi.fn(),
+    onClearFilters: vi.fn(),
+    filteredCount: 10,
+    totalCount: 20,
+    availableCategories: [
+      'Climate',
+      'LLMs',
+      'Robotics',
+      'Healthcare',
+      'Enterprise',
+      'Biotech',
+      'Infrastructure',
+    ],
   };
 
   beforeEach(() => {

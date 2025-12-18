@@ -3,12 +3,20 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CopilotChat from './CopilotChat';
 import { Company } from '@/types/company';
+import * as api from '@/lib/api';
+
+// Mock the API module
+vi.mock('@/lib/api', () => ({
+  sendChatMessage: vi.fn(),
+}));
 
 const mockCompany: Company = {
   id: '1',
   name: 'Test Company',
+  slug: 'test-company',
   description: 'Test description',
   categories: ['AI'],
+  primaryCategory: 'AI',
   year: '2023',
   stage: 'Series A',
   teamSize: 50,
@@ -19,6 +27,8 @@ const mockCompany: Company = {
 describe('CopilotChat', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    // Reset mocks before each test
+    vi.mocked(api.sendChatMessage).mockReset();
   });
 
   afterEach(() => {
@@ -103,6 +113,11 @@ describe('CopilotChat', () => {
 
   it('should generate response after sending message', async () => {
     vi.useRealTimers();
+    vi.mocked(api.sendChatMessage).mockResolvedValue({
+      answer: 'I can help you explore the portfolio and answer questions about our investments.',
+      sources: [],
+    });
+
     const user = userEvent.setup({ delay: null });
     render(<CopilotChat company={null} />);
 
@@ -120,7 +135,7 @@ describe('CopilotChat', () => {
       { timeout: 2000 }
     );
 
-    // Wait for assistant response (setTimeout with 800ms delay)
+    // Wait for assistant response
     await waitFor(
       () => {
         const assistantMessages = screen.getAllByText(/I can help you explore/i);
@@ -133,6 +148,12 @@ describe('CopilotChat', () => {
 
   it('should handle portfolio-related queries', async () => {
     vi.useRealTimers();
+    vi.mocked(api.sendChatMessage).mockResolvedValue({
+      answer:
+        'The Radical portfolio spans multiple sectors including AI, healthcare, and enterprise software.',
+      sources: [],
+    });
+
     const user = userEvent.setup({ delay: null });
     render(<CopilotChat company={null} />);
 
@@ -163,6 +184,12 @@ describe('CopilotChat', () => {
 
   it('should handle competitor queries with company selected', async () => {
     vi.useRealTimers();
+    vi.mocked(api.sendChatMessage).mockResolvedValue({
+      answer:
+        'Test Company operates in a competitive landscape with several players in the AI space.',
+      sources: [],
+    });
+
     const user = userEvent.setup({ delay: null });
     render(<CopilotChat company={mockCompany} />);
 
@@ -191,6 +218,12 @@ describe('CopilotChat', () => {
 
   it('should handle metric/performance queries with company selected', async () => {
     vi.useRealTimers();
+    vi.mocked(api.sendChatMessage).mockResolvedValue({
+      answer:
+        'Test Company has shown a strong growth trajectory with increasing revenue and user adoption.',
+      sources: [],
+    });
+
     const user = userEvent.setup({ delay: null });
     render(<CopilotChat company={mockCompany} />);
 
@@ -219,6 +252,12 @@ describe('CopilotChat', () => {
 
   it('should handle team/founder queries with company selected', async () => {
     vi.useRealTimers();
+    vi.mocked(api.sendChatMessage).mockResolvedValue({
+      answer:
+        'Test Company has a team of 50 people based in San Francisco, led by experienced founders in the AI space.',
+      sources: [],
+    });
+
     const user = userEvent.setup({ delay: null });
     render(<CopilotChat company={mockCompany} />);
 
@@ -247,6 +286,12 @@ describe('CopilotChat', () => {
 
   it('should handle trend/insight queries', async () => {
     vi.useRealTimers();
+    vi.mocked(api.sendChatMessage).mockResolvedValue({
+      answer:
+        'Key trends across the portfolio include AI infrastructure, healthcare innovation, and enterprise automation.',
+      sources: [],
+    });
+
     const user = userEvent.setup({ delay: null });
     render(<CopilotChat company={null} />);
 

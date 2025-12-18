@@ -16,17 +16,19 @@ import { describe, it, expect, beforeAll } from 'vitest';
  */
 
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3001';
-let serverAvailable = false;
 
 // Check if server is available before running tests
-beforeAll(async () => {
+async function checkServerAvailable(): Promise<boolean> {
   try {
     const response = await fetch(`${API_BASE_URL}/health`, { signal: AbortSignal.timeout(2000) });
-    serverAvailable = response.ok;
+    return response.ok;
   } catch {
-    serverAvailable = false;
+    return false;
   }
-});
+}
+
+// Use top-level await to check server availability before defining tests
+const serverAvailable = await checkServerAvailable();
 
 describe.skipIf(!serverAvailable)('E2E API Tests', () => {
   it('should return health check', async () => {

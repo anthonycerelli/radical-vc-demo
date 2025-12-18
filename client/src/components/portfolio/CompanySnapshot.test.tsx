@@ -6,13 +6,20 @@ import { Company } from '@/types/company';
 const mockCompany: Company = {
   id: '1',
   name: 'Test Company',
+  slug: 'test-company',
   description: 'Test company description',
   categories: ['AI', 'Enterprise'],
+  primaryCategory: 'AI',
   year: '2023',
+  tagline: 'Test tagline',
+  sectors: ['Technology'],
+  primarySector: 'Technology',
+  founderNames: ['John Doe', 'Jane Smith'],
+  website: 'https://test.com',
+  portfolioUrl: 'https://radical.vc/test-company',
   stage: 'Series A',
   teamSize: 50,
   location: 'San Francisco, CA',
-  website: 'https://test.com',
 };
 
 describe('CompanySnapshot', () => {
@@ -52,7 +59,8 @@ describe('CompanySnapshot', () => {
   it('should display company categories', () => {
     render(<CompanySnapshot company={mockCompany} />);
 
-    expect(screen.getByText('AI')).toBeInTheDocument();
+    const aiElements = screen.getAllByText('AI');
+    expect(aiElements.length).toBeGreaterThan(0);
     expect(screen.getByText('Enterprise')).toBeInTheDocument();
   });
 

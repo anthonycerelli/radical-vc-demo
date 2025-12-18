@@ -29,4 +29,3 @@ export function transformApiCompany(apiCompany: ApiCompany): Company {
     location: undefined,
   };
 }
-

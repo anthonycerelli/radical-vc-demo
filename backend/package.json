@@ -11,7 +11,7 @@
     "import": "tsx scripts/import_companies.ts",
     "generate-embeddings": "tsx scripts/generate_embeddings.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ext .ts --max-warnings=0",
+    "lint": "eslint . --max-warnings=0",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"

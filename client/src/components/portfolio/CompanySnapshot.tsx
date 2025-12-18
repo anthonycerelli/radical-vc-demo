@@ -28,7 +28,9 @@ const CompanySnapshot = ({ company }: CompanySnapshotProps) => {
           {company.tagline && (
             <p className="text-muted-foreground text-sm font-medium mb-2">{company.tagline}</p>
           )}
-          <p className="text-muted-foreground text-sm">{company.description || 'No description available'}</p>
+          <p className="text-muted-foreground text-sm">
+            {company.description || 'No description available'}
+          </p>
         </div>
 
         {/* Key Info Grid */}
@@ -65,7 +67,11 @@ const CompanySnapshot = ({ company }: CompanySnapshotProps) => {
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Investment Year</span>
             <span className="text-sm text-navy font-medium">
-              {company.year ? (typeof company.year === 'number' ? company.year.toString() : company.year) : 'N/A'}
+              {company.year
+                ? typeof company.year === 'number'
+                  ? company.year.toString()
+                  : company.year
+                : 'N/A'}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -91,7 +97,9 @@ const CompanySnapshot = ({ company }: CompanySnapshotProps) => {
           {company.founderNames.length > 0 && (
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Founders</span>
-              <span className="text-sm text-navy font-medium">{company.founderNames.join(', ')}</span>
+              <span className="text-sm text-navy font-medium">
+                {company.founderNames.join(', ')}
+              </span>
             </div>
           )}
           {company.location && (
@@ -132,4 +140,3 @@ const CompanySnapshot = ({ company }: CompanySnapshotProps) => {
 };
 
 export default CompanySnapshot;
-

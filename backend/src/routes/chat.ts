@@ -59,12 +59,17 @@ router.post('/', async (req: Request, res: Response) => {
     // If no embeddings, use keyword search immediately
     if (!embeddingCount || embeddingCount === 0) {
       console.warn('No embeddings found in database. Using keyword search fallback.');
-      const searchTerms = message.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+      const searchTerms = message
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((w) => w.length > 2);
       if (searchTerms.length > 0) {
         const { data: keywordResults } = await supabase
           .from('companies')
           .select('*')
-          .or(`name.ilike.%${searchTerms[0]}%,description.ilike.%${searchTerms[0]}%,radical_primary_category.ilike.%${searchTerms[0]}%`)
+          .or(
+            `name.ilike.%${searchTerms[0]}%,description.ilike.%${searchTerms[0]}%,radical_primary_category.ilike.%${searchTerms[0]}%`
+          )
           .limit(topK * 2);
 
         if (keywordResults && keywordResults.length > 0) {
@@ -121,42 +126,42 @@ router.post('/', async (req: Request, res: Response) => {
         if (!embError && embeddings && embeddings.length > 0) {
           // Calculate cosine similarity for each embedding
           const similarities = embeddings
-          .map((emb) => {
-            // Handle different embedding formats from Supabase
-            let embVector: number[];
-            if (typeof emb.embedding === 'string') {
-              // Try parsing as JSON array
-              try {
-                embVector = JSON.parse(emb.embedding);
-              } catch {
-                // If not JSON, try parsing as PostgreSQL array format
-                embVector = emb.embedding
-                  .replace(/[{}]/g, '')
-                  .split(',')
-                  .map((v) => parseFloat(v.trim()))
-                  .filter((v) => !isNaN(v));
+            .map((emb) => {
+              // Handle different embedding formats from Supabase
+              let embVector: number[];
+              if (typeof emb.embedding === 'string') {
+                // Try parsing as JSON array
+                try {
+                  embVector = JSON.parse(emb.embedding);
+                } catch {
+                  // If not JSON, try parsing as PostgreSQL array format
+                  embVector = emb.embedding
+                    .replace(/[{}]/g, '')
+                    .split(',')
+                    .map((v) => parseFloat(v.trim()))
+                    .filter((v) => !isNaN(v));
+                }
+              } else if (Array.isArray(emb.embedding)) {
+                embVector = emb.embedding;
+              } else {
+                console.warn('Unexpected embedding format:', typeof emb.embedding);
+                return null;
               }
-            } else if (Array.isArray(emb.embedding)) {
-              embVector = emb.embedding;
-            } else {
-              console.warn('Unexpected embedding format:', typeof emb.embedding);
-              return null;
-            }
 
-            if (!embVector || embVector.length !== queryEmbedding.length) {
-              return null;
-            }
+              if (!embVector || embVector.length !== queryEmbedding.length) {
+                return null;
+              }
 
-            const distance = cosineDistance(queryEmbedding, embVector);
-            // Use similarity (1 - distance) for threshold, distance < 0.5 means similarity > 0.5
-            if (distance < 0.5) {
-              return { company_id: emb.company_id, distance };
-            }
-            return null;
-          })
-          .filter((s): s is { company_id: string; distance: number } => s !== null)
-          .sort((a, b) => a.distance - b.distance)
-          .slice(0, topK);
+              const distance = cosineDistance(queryEmbedding, embVector);
+              // Use similarity (1 - distance) for threshold, distance < 0.5 means similarity > 0.5
+              if (distance < 0.5) {
+                return { company_id: emb.company_id, distance };
+              }
+              return null;
+            })
+            .filter((s): s is { company_id: string; distance: number } => s !== null)
+            .sort((a, b) => a.distance - b.distance)
+            .slice(0, topK);
 
           console.log('Fallback: computed similarities:', {
             count: similarities.length,
@@ -180,7 +185,11 @@ router.post('/', async (req: Request, res: Response) => {
             });
           }
         }
-      } else if (similarCompanies && Array.isArray(similarCompanies) && similarCompanies.length > 0) {
+      } else if (
+        similarCompanies &&
+        Array.isArray(similarCompanies) &&
+        similarCompanies.length > 0
+      ) {
         // Use RPC results if available
         // The RPC function returns companies directly with a distance field
         topCompanies = similarCompanies.map((item: Company & { distance?: number }) => {
@@ -197,16 +206,21 @@ router.post('/', async (req: Request, res: Response) => {
       // If no companies found, try a fallback: use keyword search or fetch all companies
       if (topCompanies.length === 0) {
         console.warn('No companies found from vector search, trying keyword fallback');
-        
+
         // Try keyword-based search as fallback
-        const searchTerms = message.toLowerCase().split(/\s+/).filter((w) => w.length > 3);
+        const searchTerms = message
+          .toLowerCase()
+          .split(/\s+/)
+          .filter((w) => w.length > 3);
         const keywordQuery = searchTerms.join(' | ');
-        
+
         if (keywordQuery) {
           const { data: keywordResults, error: keywordError } = await supabase
             .from('companies')
             .select('*')
-            .or(`name.ilike.%${searchTerms[0]}%,description.ilike.%${searchTerms[0]}%,radical_primary_category.ilike.%${searchTerms[0]}%`)
+            .or(
+              `name.ilike.%${searchTerms[0]}%,description.ilike.%${searchTerms[0]}%,radical_primary_category.ilike.%${searchTerms[0]}%`
+            )
             .limit(topK);
 
           if (!keywordError && keywordResults && keywordResults.length > 0) {
@@ -330,7 +344,10 @@ Do NOT mention companies not present in portfolio_context.`;
     const hallucinated = forbiddenExamples.filter((name) => answerLower.includes(name));
 
     if (hallucinated.length > 0) {
-      console.warn('Potential hallucination detected - non-portfolio companies mentioned:', hallucinated);
+      console.warn(
+        'Potential hallucination detected - non-portfolio companies mentioned:',
+        hallucinated
+      );
 
       // Regenerate with stricter prompt
       const stricterPrompt = `${systemPrompt}
@@ -338,9 +355,11 @@ Do NOT mention companies not present in portfolio_context.`;
 CRITICAL: The previous response mentioned companies that are NOT in the Radical Ventures portfolio: ${hallucinated.join(', ')}. You must ONLY mention companies from the portfolio_context JSON provided above. Do not mention any companies outside the portfolio_context.`;
 
       answer = await generateChatCompletion(stricterPrompt, userInstruction);
-      
+
       // Log if still hallucinating after regeneration
-      const stillHallucinating = forbiddenExamples.filter((name) => answer.toLowerCase().includes(name));
+      const stillHallucinating = forbiddenExamples.filter((name) =>
+        answer.toLowerCase().includes(name)
+      );
       if (stillHallucinating.length > 0) {
         console.error('Hallucination persisted after regeneration:', stillHallucinating);
       }

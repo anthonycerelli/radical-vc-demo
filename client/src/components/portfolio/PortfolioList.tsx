@@ -40,7 +40,11 @@ const PortfolioList = ({ companies, selectedCompany, onSelectCompany }: Portfoli
                 </div>
                 <div className="text-right shrink-0">
                   <span className="text-[11px] text-muted-foreground uppercase tracking-[0.08em] font-medium">
-                    {company.year ? (typeof company.year === 'number' ? company.year.toString() : company.year) : 'N/A'}
+                    {company.year
+                      ? typeof company.year === 'number'
+                        ? company.year.toString()
+                        : company.year
+                      : 'N/A'}
                   </span>
                 </div>
               </div>

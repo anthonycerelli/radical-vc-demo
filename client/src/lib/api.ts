@@ -13,7 +13,7 @@ if (import.meta.env.DEV) {
 // Warn if using localhost in production
 if (import.meta.env.PROD && API_BASE_URL.includes('localhost')) {
   console.warn(
-    '⚠️ Warning: Using localhost API URL in production. Set VITE_API_BASE_URL environment variable.'
+    'Warning: Using localhost API URL in production. Set VITE_API_BASE_URL environment variable.'
   );
 }
 
@@ -135,4 +135,3 @@ export async function sendChatMessage(request: ChatRequest): Promise<ChatRespons
 
   return response.json();
 }
-

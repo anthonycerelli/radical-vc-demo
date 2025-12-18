@@ -19,7 +19,11 @@ const Index = () => {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
   // Fetch companies from API
-  const { data: companiesData, isLoading, error } = useQuery({
+  const {
+    data: companiesData,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['companies', searchQuery, selectedCategories, selectedYear],
     queryFn: () =>
       fetchCompanies({

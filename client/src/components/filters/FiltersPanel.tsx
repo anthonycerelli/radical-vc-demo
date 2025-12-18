@@ -36,7 +36,8 @@ const FiltersPanel = ({
   totalCount,
   availableCategories,
 }: FiltersPanelProps) => {
-  const hasActiveFilters = selectedCategories.length > 0 || selectedYear !== 'All Years' || searchQuery.length > 0;
+  const hasActiveFilters =
+    selectedCategories.length > 0 || selectedYear !== 'All Years' || searchQuery.length > 0;
   return (
     <aside className="w-64 bg-background border-r border-border p-5 flex flex-col gap-6">
       <div>

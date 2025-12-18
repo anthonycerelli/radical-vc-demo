@@ -37,6 +37,48 @@ describe('Gemini library', () => {
   });
 
   describe('generateEmbedding', () => {
+    it('should generate embedding using SDK method if available', async () => {
+      const mockEmbedding = new Array(768).fill(0.1);
+
+      // Mock the SDK embedContent method
+      const mockEmbedContent = vi.fn().mockResolvedValue({
+        embeddings: [{ values: mockEmbedding }],
+      });
+
+      // @ts-expect-error - Mocking embedContent
+      genAI.embedContent = mockEmbedContent;
+
+      const result = await generateEmbedding('test text');
+
+      expect(result).toEqual(mockEmbedding);
+      expect(result.length).toBe(768);
+      expect(mockEmbedContent).toHaveBeenCalled();
+    });
+
+    it('should fallback to REST API if SDK method fails', async () => {
+      const mockEmbedding = new Array(768).fill(0.1);
+      const mockResponse = {
+        embedding: {
+          values: mockEmbedding,
+        },
+      };
+
+      // Mock SDK method to throw error
+      // @ts-expect-error - embedContent may not exist in types but we're mocking it for testing
+      genAI.embedContent = vi.fn().mockRejectedValue(new Error('SDK error'));
+
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      } as Response);
+
+      const result = await generateEmbedding('test text');
+
+      expect(result).toEqual(mockEmbedding);
+      expect(result.length).toBe(768);
+      expect(global.fetch).toHaveBeenCalled();
+    });
+
     it('should generate embedding using REST API', async () => {
       const mockEmbedding = new Array(768).fill(0.1);
       const mockResponse = {
@@ -44,6 +86,10 @@ describe('Gemini library', () => {
           values: mockEmbedding,
         },
       };
+
+      // Ensure SDK method doesn't exist
+      // @ts-expect-error - embedContent may not exist in types but we're deleting it for testing
+      delete genAI.embedContent;
 
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,

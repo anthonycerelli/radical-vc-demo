@@ -114,7 +114,9 @@ const Navbar = () => {
               </div>
               <div className="space-y-4 text-sm">
                 <div>
-                  <label className="text-navy font-medium mb-2 block">Default Investment Year</label>
+                  <label className="text-navy font-medium mb-2 block">
+                    Default Investment Year
+                  </label>
                   <Select value={defaultYear} onValueChange={setDefaultYear}>
                     <SelectTrigger className="w-full bg-background border-border text-navy">
                       <SelectValue />

@@ -31,32 +31,32 @@ interface AnalyticsChartsProps {
  */
 function calculateTicks(maxValue: number): number[] {
   if (maxValue === 0) return [0];
-  
+
   // Find a nice step size
   const magnitude = Math.pow(10, Math.floor(Math.log10(maxValue)));
   const normalized = maxValue / magnitude;
-  
+
   let step: number;
   if (normalized <= 1) step = 0.5 * magnitude;
   else if (normalized <= 2) step = magnitude;
   else if (normalized <= 5) step = 2.5 * magnitude;
   else step = 5 * magnitude;
-  
+
   // Round step to whole number
   step = Math.ceil(step);
-  
+
   const ticks: number[] = [0];
   let current = step;
   while (current <= maxValue) {
     ticks.push(current);
     current += step;
   }
-  
+
   // Ensure max value is included if not already
   if (ticks[ticks.length - 1] < maxValue) {
     ticks.push(Math.ceil(maxValue));
   }
-  
+
   return ticks;
 }
 
@@ -73,7 +73,7 @@ const AnalyticsCharts = ({
     // If no categories are selected, show all categories from all companies
     if (selectedCategories.length === 0) {
       const categoryMap = new Map<string, number>();
-      
+
       allCompanies.forEach((company) => {
         // Count all categories for each company
         company.categories?.forEach((category) => {
@@ -82,23 +82,23 @@ const AnalyticsCharts = ({
           }
         });
       });
-      
+
       return Array.from(categoryMap.entries())
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value);
     }
-    
+
     // If categories are selected, only show those selected categories
     // Count how many filtered companies have each selected category
     const categoryMap = new Map<string, number>();
-    
+
     selectedCategories.forEach((category) => {
       const count = filteredCompanies.filter((company) =>
         company.categories?.includes(category)
       ).length;
       categoryMap.set(category, count);
     });
-    
+
     return Array.from(categoryMap.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
@@ -107,29 +107,27 @@ const AnalyticsCharts = ({
   // Compute year data from filtered companies
   const yearChartData = useMemo(() => {
     const yearMap = new Map<string, number>();
-    
+
     filteredCompanies.forEach((company) => {
       if (company.year) {
         const yearStr = typeof company.year === 'number' ? company.year.toString() : company.year;
         yearMap.set(yearStr, (yearMap.get(yearStr) || 0) + 1);
       }
     });
-    
+
     return Array.from(yearMap.entries())
       .map(([year, count]) => ({ year, count }))
       .sort((a, b) => a.year.localeCompare(b.year));
   }, [filteredCompanies]);
 
   // Calculate dynamic ticks for category chart
-  const maxCategoryValue = categoryChartData.length > 0 
-    ? Math.max(...categoryChartData.map((d) => d.value))
-    : 0;
+  const maxCategoryValue =
+    categoryChartData.length > 0 ? Math.max(...categoryChartData.map((d) => d.value)) : 0;
   const categoryTicks = calculateTicks(maxCategoryValue);
 
   // Calculate dynamic ticks for year chart
-  const maxYearValue = yearChartData.length > 0
-    ? Math.max(...yearChartData.map((d) => d.count))
-    : 0;
+  const maxYearValue =
+    yearChartData.length > 0 ? Math.max(...yearChartData.map((d) => d.count)) : 0;
   const yearTicks = calculateTicks(maxYearValue);
 
   return (
@@ -201,10 +199,7 @@ const AnalyticsCharts = ({
         <h3 className="section-label mb-4">Investments by Year</h3>
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={yearChartData}
-              margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
-            >
+            <BarChart data={yearChartData} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
               <XAxis
                 dataKey="year"
                 axisLine={{ stroke: COLORS.border }}

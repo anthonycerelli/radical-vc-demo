@@ -87,21 +87,26 @@ Execute the migration files in order against your Supabase database:
    ```
 
 8. **Update for Gemini embeddings** (768 dimensions):
+
    ```sql
    -- Run migrations/009_update_for_gemini_embeddings.sql
    ```
 
 9. **Insert portfolio companies data**:
+
    ```sql
    -- Run migrations/010_insert_portfolio_companies.sql
    ```
+
    This migration inserts all portfolio companies from the JSON data. After running this, you should also run the import script to generate embeddings.
 
 10. **Add full-text search optimizations** (optional but recommended):
-   ```sql
-   -- Run migrations/011_add_fulltext_search_index.sql
-   ```
-   This migration adds full-text search capabilities and hybrid search functions for enhanced AI search capabilities.
+
+```sql
+-- Run migrations/011_add_fulltext_search_index.sql
+```
+
+This migration adds full-text search capabilities and hybrid search functions for enhanced AI search capabilities.
 
 You can run these migrations via:
 
@@ -120,6 +125,7 @@ npm run generate-embeddings
 ```
 
 This script will:
+
 - Fetch all companies from the database
 - Generate embeddings for companies that don't have them yet
 - Store embeddings in the `company_embeddings` table using Google Gemini (768 dimensions)
@@ -133,6 +139,7 @@ npm run import
 ```
 
 This script will:
+
 - Read the JSON file
 - Upsert companies into the database
 - Generate embeddings for each company using Google Gemini (768 dimensions)
@@ -162,17 +169,20 @@ The server will start on `http://localhost:3001` (or your configured PORT).
 The database schema is optimized for AI applications with the following features:
 
 ### Vector Embeddings
+
 - **768-dimensional embeddings** using Google Gemini's `text-embedding-004` model
 - **IVFFlat index** for fast similarity search (cosine distance)
 - **Automatic embedding generation** from company name, tagline, description, categories, and sectors
 - **Semantic search** via `search_similar_companies()` function
 
 ### Full-Text Search
+
 - **GIN index** on generated `tsvector` column for keyword search
 - **Automatic updates** when company data changes
 - **English language** text processing with stemming and stop-word removal
 
 ### Hybrid Search
+
 - **Combines vector similarity + full-text search** for best results
 - **Configurable weights** for balancing semantic vs keyword matching
 - **Filter support** for categories, years, and other attributes
@@ -180,6 +190,7 @@ The database schema is optimized for AI applications with the following features
 ### Database Functions
 
 #### Vector Similarity Search
+
 ```sql
 SELECT * FROM search_similar_companies(
   query_embedding := '[0.1, 0.2, ...]'::vector(768),
@@ -189,6 +200,7 @@ SELECT * FROM search_similar_companies(
 ```
 
 #### Full-Text Search
+
 ```sql
 SELECT * FROM search_companies_by_text(
   search_query := 'AI healthcare',
@@ -199,6 +211,7 @@ SELECT * FROM search_companies_by_text(
 ```
 
 #### Hybrid Search (Recommended)
+
 ```sql
 SELECT * FROM hybrid_search_companies(
   query_embedding := '[0.1, 0.2, ...]'::vector(768),
