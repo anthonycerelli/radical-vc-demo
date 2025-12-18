@@ -174,7 +174,8 @@ describe('Gemini library', () => {
       await generateChatCompletion(
         'You are a helpful assistant',
         'What is AI?',
-        'Context information'
+        [], // conversationHistory
+        'Context information' // context
       );
 
       const callArgs = mockModel.generateContent.mock.calls[0][0];

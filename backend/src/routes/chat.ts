@@ -7,10 +7,16 @@ import { Company } from '../types/database.js';
 const router = Router();
 
 // Request validation schema
+const chatMessageSchema = z.object({
+  role: z.enum(['user', 'assistant']),
+  content: z.string(),
+});
+
 const chatRequestSchema = z.object({
   message: z.string().min(1, 'Message cannot be empty'),
   selectedCompanySlug: z.string().nullable().optional(),
   topK: z.number().int().min(1).max(10).optional().default(5),
+  conversationHistory: z.array(chatMessageSchema).optional(),
 });
 
 /**
@@ -30,7 +36,7 @@ router.post('/', async (req: Request, res: Response) => {
       });
     }
 
-    const { message, selectedCompanySlug, topK } = validationResult.data;
+    const { message, selectedCompanySlug, topK, conversationHistory } = validationResult.data;
 
     // Fetch selected company if provided
     let selectedCompany: Company | null = null;
@@ -321,8 +327,13 @@ Format your response as clean, readable text without markdown syntax. Use line b
 
 Do NOT mention companies not present in portfolio_context.`;
 
-    // Generate LLM response
-    let answer = await generateChatCompletion(systemPrompt, userInstruction);
+    // Generate LLM response with conversation history
+    let answer = await generateChatCompletion(
+      systemPrompt,
+      userInstruction,
+      conversationHistory || [],
+      portfolioContextJson
+    );
 
     // Hallucination detection - check for non-portfolio companies
     const forbiddenExamples = [
@@ -354,7 +365,12 @@ Do NOT mention companies not present in portfolio_context.`;
 
 CRITICAL: The previous response mentioned companies that are NOT in the Radical Ventures portfolio: ${hallucinated.join(', ')}. You must ONLY mention companies from the portfolio_context JSON provided above. Do not mention any companies outside the portfolio_context.`;
 
-      answer = await generateChatCompletion(stricterPrompt, userInstruction);
+      answer = await generateChatCompletion(
+        stricterPrompt,
+        userInstruction,
+        conversationHistory || [],
+        portfolioContextJson
+      );
 
       // Log if still hallucinating after regeneration
       const stillHallucinating = forbiddenExamples.filter((name) =>

@@ -55,10 +55,16 @@ export interface ChatResponse {
   }>;
 }
 
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export interface ChatRequest {
   message: string;
   selectedCompanySlug?: string | null;
   topK?: number;
+  conversationHistory?: ChatMessage[];
 }
 
 /**

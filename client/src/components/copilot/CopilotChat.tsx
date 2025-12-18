@@ -102,15 +102,23 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
-    }
-  };
-
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isLoading]);
+    // Scroll to show the top of the new message instead of bottom
+    if (messagesContainerRef.current && messages.length > 1) {
+      // Find the last message element
+      const lastMessageId = messages[messages.length - 1]?.id;
+      if (lastMessageId) {
+        const lastMessage = messagesContainerRef.current.querySelector(
+          `[data-message-id="${lastMessageId}"]`
+        );
+        if (lastMessage && typeof (lastMessage as HTMLElement).scrollIntoView === 'function') {
+          // Scroll to show the top of the new message
+          (lastMessage as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length]); // Only trigger on message count change, not on isLoading
 
   useEffect(() => {
     if (company) {
@@ -142,10 +150,19 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
     setIsLoading(true);
 
     try {
+      // Build conversation history (exclude the initial greeting)
+      const conversationHistory = messages
+        .filter((msg) => msg.id !== '1') // Exclude initial greeting
+        .map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+        }));
+
       const response = await sendChatMessage({
         message: currentInput,
         selectedCompanySlug: company?.slug || null,
         topK: 5,
+        conversationHistory,
       });
 
       const assistantMessage: Message = {
@@ -184,6 +201,7 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
         {messages.map((message) => (
           <div
             key={message.id}
+            data-message-id={message.id}
             className={`flex gap-3 animate-fade-in ${
               message.role === 'user' ? 'flex-row-reverse' : ''
             }`}

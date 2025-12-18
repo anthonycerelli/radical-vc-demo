@@ -94,13 +94,19 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   }
 }
 
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 /**
  * Generate chat completion using Gemini gemini-2.5-flash
- * Combines system prompt, context, and user message into a structured conversation
+ * Combines system prompt, context, conversation history, and user message into a structured conversation
  */
 export async function generateChatCompletion(
   systemPrompt: string,
   userMessage: string,
+  conversationHistory: ChatMessage[] = [],
   context?: string
 ): Promise<string> {
   const model = genAI.getGenerativeModel({
@@ -109,15 +115,39 @@ export async function generateChatCompletion(
     systemInstruction: systemPrompt,
   });
 
-  // Build the user message with context if provided
+  // Build conversation contents array
+  const contents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
+
+  // Add conversation history (convert assistant -> model for Gemini API)
+  for (const msg of conversationHistory) {
+    if (msg.role === 'user') {
+      contents.push({
+        role: 'user',
+        parts: [{ text: msg.content }],
+      });
+    } else if (msg.role === 'assistant') {
+      contents.push({
+        role: 'model',
+        parts: [{ text: msg.content }],
+      });
+    }
+  }
+
+  // Build the current user message with context if provided
   let userContent = userMessage;
   if (context) {
     userContent = `Context:\n${context}\n\nUser Question: ${userMessage}`;
   }
 
+  // Add current user message
+  contents.push({
+    role: 'user',
+    parts: [{ text: userContent }],
+  });
+
   try {
     const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: userContent }] }],
+      contents,
     });
 
     const response = await result.response;
