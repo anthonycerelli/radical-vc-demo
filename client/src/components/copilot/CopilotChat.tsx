@@ -82,6 +82,7 @@ interface Message {
   id: string;
   role: 'assistant' | 'user';
   content: string;
+  isStreaming?: boolean; // Track if message is still being typed
 }
 
 interface CopilotChatProps {
@@ -101,9 +102,20 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const streamingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup streaming timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (streamingTimeoutRef.current) {
+        clearTimeout(streamingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     // Scroll within the chat container to show the top of the new message
+    // Also scroll during streaming to keep the typing message visible
     if (messagesContainerRef.current && messages.length > 1) {
       // Find the last message element
       const lastMessageId = messages[messages.length - 1]?.id;
@@ -118,10 +130,12 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
 
           // Scroll the container to show the top of the new message
           // This keeps the scroll within the chat div, not the entire page
+          // Use instant scroll during streaming for smoother experience
+          const isStreaming = messages[messages.length - 1]?.isStreaming;
           if (typeof container.scrollTo === 'function') {
             container.scrollTo({
               top: messageTop,
-              behavior: 'smooth',
+              behavior: isStreaming ? 'auto' : 'smooth',
             });
           } else {
             // Fallback for environments without scrollTo
@@ -130,8 +144,7 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
         }
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages.length]); // Only trigger on message count change, not on isLoading
+  }, [messages]); // Trigger on message content changes (including streaming updates)
 
   useEffect(() => {
     if (company) {
@@ -178,20 +191,66 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
         conversationHistory,
       });
 
+      // Create message with streaming flag
+      const assistantMessageId = (Date.now() + 1).toString();
       const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: assistantMessageId,
         role: 'assistant',
-        content: response.answer,
+        content: '',
+        isStreaming: true,
       };
+
+      // Add empty message first
       setMessages((prev) => [...prev, assistantMessage]);
+      setIsLoading(false);
+
+      // Stream the response word by word
+      const fullText = response.answer;
+      const words = fullText.split(/(\s+)/); // Split preserving whitespace
+      let currentIndex = 0;
+
+      const streamWord = () => {
+        if (currentIndex < words.length) {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId
+                ? {
+                    ...msg,
+                    content: words.slice(0, currentIndex + 1).join(''),
+                    isStreaming: currentIndex < words.length - 1,
+                  }
+                : msg
+            )
+          );
+          currentIndex++;
+          // Adjust speed: faster for short words, slower for punctuation
+          const word = words[currentIndex - 1];
+          const delay = word.length > 10 ? 50 : word.match(/[.,!?;:]/) ? 100 : 30;
+          streamingTimeoutRef.current = setTimeout(streamWord, delay);
+        } else {
+          // Streaming complete
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId ? { ...msg, isStreaming: false } : msg
+            )
+          );
+        }
+      };
+
+      // Start streaming after a short delay
+      streamingTimeoutRef.current = setTimeout(streamWord, 50);
     } catch (error) {
+      // Clear any streaming timeout on error
+      if (streamingTimeoutRef.current) {
+        clearTimeout(streamingTimeoutRef.current);
+      }
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Failed to get response'}. Please try again.`,
+        isStreaming: false,
       };
       setMessages((prev) => [...prev, errorMessage]);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -237,6 +296,9 @@ const CopilotChat = ({ company }: CopilotChatProps) => {
             >
               <div className="text-sm whitespace-pre-wrap prose prose-sm max-w-none">
                 {formatChatMessage(message.content)}
+                {message.isStreaming && (
+                  <span className="inline-block w-2 h-4 ml-1 bg-navy animate-pulse" />
+                )}
               </div>
             </div>
           </div>
